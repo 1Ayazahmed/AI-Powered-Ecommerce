@@ -1,0 +1,397 @@
+import asyncHandler from "../middlewares/asyncHandler.js";
+import Product from "../models/productModel.js";
+import fs from "fs";
+import path from "path";
+
+// const addProduct = asyncHandler(async (req, res) => {
+//   try {
+//     // const { name, description, price, category, quantity, brand } = req.fields;
+//     const { name, description, price, category, quantity, brand, countInStock } = req.body;
+
+
+
+//     // Validation
+//     switch (true) {
+//       case !name:
+//         return res.json({ error: "Name is required" });
+//       case !brand:
+//         return res.json({ error: "Brand is required" });
+//       case !description:
+//         return res.json({ error: "Description is required" });
+//       case !price:
+//         return res.json({ error: "Price is required" });
+//       case !category:
+//         return res.json({ error: "Category is required" });
+//       case !quantity:
+//         return res.json({ error: "Quantity is required" });
+//     }
+
+// //     const product = new Product({ ...req.fields });
+// //     await product.save();
+// //     res.json(product);
+// //     console.log(product)
+// //   } catch (error) {
+// //     console.error(error);
+// //     res.status(400).json(error.message);
+// //   }
+// // });
+
+
+// const product = new Product({
+//   name,
+//   description,
+//   price,
+//   category,
+//   quantity,
+//   brand,
+//   countInStock,
+// });
+// await product.save();
+// res.json(product);
+// console.log(product)
+// console.log("BODY", req.body);
+// console.log("FILES", req.file || req.files);
+
+// } catch (error) {
+// console.error(error);
+// res.status(400).json(error.message);
+// }
+// });
+
+
+
+
+
+
+// const updateProductDetails = asyncHandler(async (req, res) => {
+//   try {
+//     // const { name, description, price, category, quantity, brand } = req.fields;
+//     const { name, description, price, category, quantity, brand, countInStock } = req.body;
+
+
+//     // Validation
+//     switch (true) {
+//       case !name:
+//         return res.json({ error: "Name is required" });
+//       case !brand:
+//         return res.json({ error: "Brand is required" });
+//       case !description:
+//         return res.json({ error: "Description is required" });
+//       case !price:
+//         return res.json({ error: "Price is required" });
+//       case !category:
+//         return res.json({ error: "Category is required" });
+//       case !quantity:
+//         return res.json({ error: "Quantity is required" });
+//     }
+
+//     const product = await Product.findByIdAndUpdate(
+//       req.params.id,
+//       { ...req.fields },
+//       { new: true }
+//     );
+
+//     await product.save();
+
+//     res.json(product);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).json(error.message);
+//   }
+// });
+
+
+
+// ---------------chatgpt code of update and add product-----------------
+
+// Add Product
+const addProduct = async (req, res) => {
+  try {
+    console.log('BODY:', req.body);
+    console.log('FILE:', req.file);
+    console.log('USER:', req.user);
+    const {
+      name,
+      description,
+      brand,
+      price,
+      category,
+      countInStock,
+      quantity,
+    } = req.body;
+
+    const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const product = new Product({
+      name,
+      description,
+      brand,
+      price,
+      category,
+      countInStock,
+      quantity,
+      image,
+      user: req.user._id,
+    });
+
+    const createdProduct = await product.save();
+    res.status(201).json(createdProduct);
+  } catch (err) {
+    console.error('Add Product Error:', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update Product
+const updateProductDetails = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      product.name = req.body.name || product.name;
+      product.description = req.body.description || product.description;
+      product.brand = req.body.brand || product.brand;
+      product.price = req.body.price || product.price;
+      product.category = req.body.category || product.category;
+      product.countInStock = req.body.countInStock || product.countInStock;
+
+      if (req.file) {
+        // Delete old image
+        if (product.image) {
+          const oldImagePath = path.join("uploads", path.basename(product.image));
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+
+        product.image = `/uploads/${req.file.filename}`;
+      }
+
+      const updatedProduct = await product.save();
+      res.json(updatedProduct);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+
+// ---------------chatgpt code of update and add product-----------------
+
+
+
+const removeProduct = asyncHandler(async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+const uploadsDir = path.join(process.cwd(), "backend", "uploads");
+const defaultImage = "/uploads/default.jpg";
+
+function ensureImageExists(product) {
+  console.log('\nChecking product image:', {
+    productId: product._id,
+    productName: product.name,
+    originalImage: product.image
+  });
+
+  if (product.image) {
+    const filename = product.image.split("/").pop();
+    const fullPath = path.join(uploadsDir, filename);
+    
+    // Debug logging
+    console.log('Image details:', {
+      image: product.image,
+      filename: filename,
+      fullPath: fullPath,
+      exists: fs.existsSync(fullPath),
+      uploadsDir: uploadsDir,
+      filesInDir: fs.readdirSync(uploadsDir)
+    });
+    
+    if (fs.existsSync(fullPath)) {
+      console.log('Image found, keeping original path');
+      return product;
+    } else {
+      // Try to find a similar image
+      const files = fs.readdirSync(uploadsDir);
+      const similarImage = files.find(f => f.startsWith('image-') && f.endsWith(path.extname(filename)));
+      
+      if (similarImage) {
+        console.log('Found similar image, using:', similarImage);
+        product.image = `/uploads/${similarImage}`;
+        return product;
+      }
+      
+      console.log('No similar image found, using default');
+      product.image = defaultImage;
+    }
+  } else {
+    console.log('No image set, using default');
+    product.image = defaultImage;
+  }
+  return product;
+}
+
+const fetchProducts = asyncHandler(async (req, res) => {
+  try {
+    const pageSize = 6;
+
+    const keyword = req.query.keyword
+      ? {
+          name: {
+            $regex: req.query.keyword,
+            $options: "i",
+          },
+        }
+      : {};
+
+    const count = await Product.countDocuments({ ...keyword });
+    let products = await Product.find({ ...keyword }).limit(pageSize);
+    products = products.map(p => ensureImageExists(p));
+
+    res.json({
+      products,
+      page: 1,
+      pages: Math.ceil(count / pageSize),
+      hasMore: false,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
+
+const fetchProductById = asyncHandler(async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (product) {
+      ensureImageExists(product);
+      return res.json(product);
+    } else {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ error: "Product not found" });
+  }
+});
+
+const fetchAllProducts = asyncHandler(async (req, res) => {
+  try {
+    let products = await Product.find({})
+      .populate("category")
+      .limit(12)
+      .sort({ createAt: -1 });
+    products = products.map(p => ensureImageExists(p));
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
+
+const addProductReview = asyncHandler(async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      const alreadyReviewed = product.reviews.find(
+        (r) => r.user.toString() === req.user._id.toString()
+      );
+
+      if (alreadyReviewed) {
+        res.status(400);
+        throw new Error("Product already reviewed");
+      }
+
+      const review = {
+        name: req.user.username,
+        rating: Number(rating),
+        comment,
+        user: req.user._id,
+      };
+
+      product.reviews.push(review);
+
+      product.numReviews = product.reviews.length;
+
+      product.rating =
+        product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+        product.reviews.length;
+
+      await product.save();
+      res.status(201).json({ message: "Review added" });
+    } else {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(error.message);
+  }
+});
+
+const fetchTopProducts = asyncHandler(async (req, res) => {
+  try {
+    let products = await Product.find({}).sort({ rating: -1 }).limit(4);
+    products = products.map(p => ensureImageExists(p));
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(error.message);
+  }
+});
+
+const fetchNewProducts = asyncHandler(async (req, res) => {
+  try {
+    let products = await Product.find().sort({ _id: -1 }).limit(5);
+    products = products.map(p => ensureImageExists(p));
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(error.message);
+  }
+});
+
+const filterProducts = asyncHandler(async (req, res) => {
+  try {
+    const { checked, radio } = req.body;
+
+    let args = {};
+    if (checked.length > 0) args.category = checked;
+    if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
+
+    let products = await Product.find(args);
+    products = products.map(p => ensureImageExists(p));
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
+
+export {
+  addProduct,
+  updateProductDetails,
+  removeProduct,
+  fetchProducts,
+  fetchProductById,
+  fetchAllProducts,
+  addProductReview,
+  fetchTopProducts,
+  fetchNewProducts,
+  filterProducts,
+};
