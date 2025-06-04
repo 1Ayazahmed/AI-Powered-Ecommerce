@@ -32,18 +32,39 @@ const Register = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    // Basic Validation
+    if (!username || !email || !password || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return; // Stop submission
+    }
+
+    // Email format validation (a simple check)
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return; // Stop submission
+    }
+
+    // Password match validation
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
-    } else {
-      try {
-        const res = await register({ username, email, password }).unwrap();
-        dispatch(setCredentials({ ...res }));
-        navigate(redirect);
-        toast.success("User successfully registered");
-      } catch (err) {
-        console.log(err);
-        toast.error(err.data.message);
-      }
+      return; // Stop submission
+    }
+
+    // Password strength validation (example: minimum 6 characters)
+    if (password.length < 6) {
+        toast.error("Password must be at least 6 characters long");
+        return; // Stop submission
+    }
+
+    try {
+      const res = await register({ username, email, password }).unwrap();
+      dispatch(setCredentials({ ...res }));
+      navigate(redirect);
+      toast.success("User successfully registered");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.data.message);
     }
   };
 

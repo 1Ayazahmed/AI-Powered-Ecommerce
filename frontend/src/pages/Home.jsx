@@ -16,6 +16,9 @@ const Home = () => {
   const { keyword } = useParams();
   const dispatch = useDispatch();
 
+  // Get user info from Redux state
+  const { userInfo } = useSelector((state) => state.auth);
+
   // Use AI recommendations state from Redux
   const { recommendations, loading, error } = useSelector((state) => state.ai);
 
@@ -26,8 +29,9 @@ const Home = () => {
 
   useEffect(() => {
     // Fetch initial recommendations when component mounts
-    dispatch(fetchRecommendations());
-  }, [dispatch]);
+    // Pass userId to fetch personalized recommendations if user is logged in
+    dispatch(fetchRecommendations({ userId: userInfo?._id }));
+  }, [dispatch, userInfo?._id]); // Add userInfo?._id as a dependency
 
   useEffect(() => {
     // Append new recommendations for infinite scrolling
@@ -56,19 +60,20 @@ const Home = () => {
         ) : error.recommendations ? (
           <Message variant="danger">{error.recommendations.details || error.recommendations}</Message>
         ) : (
-          <div>
-            <h1 className="text-2xl font-bold mb-6">AI Recommended Products</h1>
+          <div className="container mx-auto p-4 md:p-6">
+            <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">AI Recommended Products</h1>
             <InfiniteScroll
-              dataLength={allRecommendations.length} // This is important field to render the next data
+              dataLength={allRecommendations.length}
               next={fetchMoreData}
               hasMore={hasMore}
-              loader={<Loader />} // Show loader at the bottom
+              loader={<Loader />}
               endMessage={!hasMore && allRecommendations.length > 0 ? <p style={{ textAlign: 'center' }}><b>You have seen all recommendations</b></p> : null}
-              // Add a scrollableTarget if you have a specific container
             >
-              <div className="flex flex-wrap justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {allRecommendations.map((product) => (
-                  <Product key={product._id} product={product} />
+                  <div key={product._id}>
+                    <Product product={product} />
+                  </div>
                 ))}
               </div>
             </InfiniteScroll>

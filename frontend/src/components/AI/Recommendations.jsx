@@ -1,28 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
-const Recommendations = () => {
+// Accept productId as a prop
+const Recommendations = ({ productId }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Get user info from Redux state
+  const { userInfo } = useSelector((state) => state.auth);
+
   useEffect(() => {
-    fetchRecommendations();
-  }, []);
+    // Fetch recommendations only if productId is available
+    if (productId) {
+        fetchRecommendations();
+    }
+  }, [userInfo, productId]); // Add productId as a dependency
 
   const fetchRecommendations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/recommendations');
-      setRecommendations(response.data.recommendations);
+      setLoading(true);
+      setError(null);
+
+      const requestPayload = {
+          productId: productId // Include the productId in the request
+      };
+
+      if (userInfo && userInfo._id) {
+        requestPayload.userId = userInfo._id; // Include the logged-in user's ID
+      }
+
+      // Fetch recommendations from the AI recommendation service
+      const response = await axios.post('http://localhost:5001/recommend', requestPayload); 
+
+      // The backend /recommend endpoint returns a list directly
+      setRecommendations(response.data);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching recommendations:', err);
       setError('Failed to load recommendations');
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading && productId) { // Only show loading if productId is available
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -30,12 +53,17 @@ const Recommendations = () => {
     );
   }
 
-  if (error) {
+  if (error && productId) { // Only show error if productId is available
     return (
       <div className="text-center text-red-600 p-4">
         {error}
       </div>
     );
+  }
+
+  // Don't render if no recommendations and not loading/error (e.g., productId not yet loaded)
+  if (!recommendations || recommendations.length === 0) {
+      return null; // Or render a placeholder if you prefer
   }
 
   return (

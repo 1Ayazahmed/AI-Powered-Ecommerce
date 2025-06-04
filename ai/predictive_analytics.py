@@ -9,16 +9,26 @@ from sklearn.ensemble import RandomForestClassifier
 from datetime import datetime, timedelta
 import logging
 import random
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 # MongoDB connection
-client = MongoClient("mongodb+srv://ayazkk616:Ayaz.%40hmed.%401999@mern-commerce-cluster.ntyxp1b.mongodb.net/?retryWrites=true&w=majority&appName=mern-commerce-cluster")
-db = client['fyp']
-orders_collection = db['orders']
-users_collection = db['users']
-products_collection = db['products']
+try:
+    client = MongoClient(os.getenv('MONGODB_URI', "mongodb+srv://ayazkk616:Ayaz.%40hmed.%401999@mern-commerce-cluster.ntyxp1b.mongodb.net/?retryWrites=true&w=majority&appName=mern-commerce-cluster"))
+    db = client['test']
+    orders_collection = db['orders']
+    users_collection = db['users']
+    products_collection = db['products']
+    print("✅ MongoDB connection successful")
+except Exception as e:
+    print(f"❌ MongoDB connection error: {str(e)}")
+    raise e
 
 def get_user_features(user_id):
     """Extract features for user behavior analysis"""
@@ -44,17 +54,22 @@ def predict_next_purchase(user_id):
     """Predict next purchase category and timing"""
     features = get_user_features(user_id)
     if not features:
+        print(f"Predictive Analytics: No features found for user {user_id}")
         return None
 
     # Get historical purchase patterns
     orders = list(orders_collection.find({"user": ObjectId(user_id)}))
+    print(f"Predictive Analytics: Found {len(orders)} orders for user {user_id}")
     if not orders:
+        print(f"Predictive Analytics: No orders found for user {user_id}")
         return None
 
     # Calculate purchase frequency
     order_dates = [order['createdAt'] for order in orders]
     order_dates.sort()
+    print(f"Predictive Analytics: Order dates for user {user_id}: {order_dates}")
     time_diffs = [(order_dates[i] - order_dates[i-1]).days for i in range(1, len(order_dates))]
+    print(f"Predictive Analytics: Time differences for user {user_id}: {time_diffs}")
     avg_purchase_frequency = sum(time_diffs) / len(time_diffs) if time_diffs else 30
 
     # Predict next purchase date
@@ -69,12 +84,25 @@ def predict_next_purchase(user_id):
             if category:
                 category_counts[category] = category_counts.get(category, 0) + 1
 
+    print(f"Predictive Analytics: Category counts for user {user_id}: {category_counts}")
     predicted_category = max(category_counts.items(), key=lambda x: x[1])[0] if category_counts else None
+    if not predicted_category:
+         print(f"Predictive Analytics: No categories found in order items for user {user_id}")
+
+    # Prepare historical purchase data for frontend
+    purchase_history = [
+        {
+            'date': order['createdAt'].isoformat(),
+            'total': order.get('totalPrice', 0)
+        }
+        for order in orders
+    ]
 
     return {
         'predicted_next_purchase_date': predicted_next_purchase.isoformat(),
         'predicted_category': predicted_category,
-        'confidence_score': 0.8 if len(orders) > 5 else 0.6
+        'confidence_score': 0.8 if len(orders) > 5 else 0.6,
+        'purchase_history': purchase_history
     }
 
 @app.route('/predict', methods=['POST'])
@@ -260,5 +288,31 @@ def get_sales_forecast(time_range):
         print(f"Error in get_sales_forecast: {str(e)}")
         return []
 
+@app.route('/users', methods=['GET'])
+def list_users():
+    """List users with their IDs for testing purposes"""
+    print("Accessing /users endpoint") # Debug print statement
+    try:
+        users = list(users_collection.find({}, {
+            '_id': 1,
+            'name': 1,
+            'email': 1
+        }))
+        
+        # Convert ObjectId to string for JSON serialization
+        formatted_users = [{
+            'id': str(user['_id']),
+            'name': user.get('name', 'N/A'),
+            'email': user.get('email', 'N/A')
+        } for user in users]
+        
+        return jsonify(formatted_users)
+    except Exception as e:
+        logging.exception("Error listing users:")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002)
+    print("Flask app routes:")
+    for rule in app.url_map.iter_rules():
+        print(f"Endpoint: {rule.endpoint}, Methods: {rule.methods}, Rule: {rule.rule}")
+    app.run(host='0.0.0.0', port=5004)

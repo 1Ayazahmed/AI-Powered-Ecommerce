@@ -5,14 +5,16 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "backend": "nodemon backend/index.js",
-    "frontend": "npm run dev --prefix frontend",
-    "dev": "concurrently \"npm run frontend\" \"npm run backend"
+    "backend": "cd backend && nodemon -r dotenv/config index.js",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\""
   },
   "keywords": [],
   "author": "HuXn WebDev",
   "license": "ISC",
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
+    "antd": "^5.25.3",
     "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.2",
@@ -26,7 +28,8 @@
     "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.0.1",
-    "react-infinite-scroll-component": "^6.1.0"
+    "react-infinite-scroll-component": "^6.1.0",
+    "recharts": "^2.15.3"
   },
   "devDependencies": {
     "patch-package": "^8.0.0"

@@ -1,20 +1,43 @@
 import { Link } from "react-router-dom";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/features/cart/cartSlice";
 import { toast } from "react-toastify";
 import HeartIcon from "./HeartIcon";
+import { FaTruck } from "react-icons/fa";
 
 const ProductCard = ({ p }) => {
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  
+  console.log('ProductCard - VITE_BACKEND_URL:', import.meta.env.VITE_BACKEND_URL);
+  console.log('ProductCard - backendUrl:', backendUrl);
+
+  // Access currency state from Redux
+  const { currentCurrency, exchangeRates } = useSelector((state) => state.currency);
+
+  // Helper function to convert price
+  const convertPrice = (priceInPKR) => {
+    if (currentCurrency === "PKR" || !exchangeRates || !exchangeRates[currentCurrency]) {
+      return `PKR ${priceInPKR?.toFixed(2)}`;
+    } else {
+      const rate = exchangeRates[currentCurrency];
+      const convertedPrice = priceInPKR * rate;
+      return `${currentCurrency} ${convertedPrice.toFixed(2)}`;
+    }
+  };
 
   // Add debug logging
   console.log('ProductCard rendering:', {
     productId: p._id,
     productName: p.name,
     imagePath: p.image,
-    fullImageUrl: `${backendUrl}${p.image}`
+    fullImageUrl: p.image.startsWith('http') ? p.image : `${backendUrl}${p.image}`,
+    discountPercentage: p.discountPercentage,
+    isFreeDelivery: p.isFreeDelivery,
+    discountedPrice: p.discountedPrice,
+    currentCurrency,
+    exchangeRates,
   });
 
   const addToCartHandler = (product, qty) => {
@@ -32,14 +55,19 @@ const ProductCard = ({ p }) => {
           <span className="absolute bottom-3 right-3 bg-pink-100 text-pink-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">
             {p?.brand}
           </span>
+          {p.discountPercentage > 0 && (
+             <span className="absolute top-3 left-3 bg-green-500 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">
+                {p.discountPercentage}% OFF
+             </span>
+          )}
           <img
             className="cursor-pointer w-full"
-            src={`${backendUrl}${p.image}`}
+            src={p.image.startsWith('http') ? p.image : `${backendUrl}${p.image}`}
             alt={p.name}
             style={{ height: "170px", objectFit: "cover" }}
             onError={(e) => {
               console.error('Image failed to load:', {
-                attemptedUrl: `${backendUrl}${p.image}`,
+                attemptedUrl: p.image.startsWith('http') ? p.image : `${backendUrl}${p.image}`,
                 productId: p._id,
                 productName: p.name
               });
@@ -61,15 +89,30 @@ const ProductCard = ({ p }) => {
       </section>
 
       <div className="p-5">
-        <div className="flex justify-between">
-          <h5 className="mb-2 text-xl text-whiet dark:text-white">{p?.name}</h5>
+        <div className="flex justify-between items-center">
+          <h5 className="mb-2 text-xl text-white dark:text-white">{p?.name}</h5>
 
-          <p className="text-black font-semibold text-pink-500">
-            {p?.price?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "PKR",
-            })}
-          </p>
+          <div>
+             {p.discountPercentage > 0 ? (
+               <div className="flex flex-col items-end">
+                 <p className="text-gray-500 line-through text-sm">
+                   {convertPrice(p?.price)}
+                 </p>
+                 <p className="text-pink-500 font-semibold text-lg">
+                   {convertPrice(p?.discountedPrice)}
+                 </p>
+               </div>
+             ) : (
+               <p className="text-pink-500 font-semibold text-lg">
+                 {convertPrice(p?.price)}
+               </p>
+             )}
+
+             {p.isFreeDelivery && (
+                <FaTruck className="text-green-500 mt-1" size={20} />
+             )}
+          </div>
+
         </div>
 
         <p className="mb-3 font-normal text-[#CFCFCF]">

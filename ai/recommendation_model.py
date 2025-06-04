@@ -93,6 +93,17 @@ def calculate_user_preferences(user_id):
     
     return preferences
 
+def serialize_objectids(data):
+    """Recursively convert ObjectId instances to strings in a dictionary or list."""
+    if isinstance(data, dict):
+        return {key: serialize_objectids(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [serialize_objectids(element) for element in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    else:
+        return data
+
 @app.route('/recommend', methods=['POST'])
 def recommend():
     try:
@@ -138,11 +149,12 @@ def recommend():
 
         # Get top 6 similar products excluding current product
         similar_indices = final_scores.argsort()[-7:][::-1]
-        recommended = [
-            serialize_product(all_products[i])
-            for i in similar_indices
-            if i != target_index
-        ]
+        recommended = []
+        for i in similar_indices:
+            if i != target_index:
+                product = all_products[i].copy()  # Create a copy to avoid modifying the original
+                serialized_product = serialize_objectids(product) # Recursively serialize ObjectIds
+                recommended.append(serialized_product)
 
         return jsonify(recommended)
 
@@ -167,10 +179,15 @@ def get_recommendations(recent_orders):
     Generate personalized product recommendations based on user's order history.
     """
     try:
+        print("Starting get_recommendations...")
         # If no order history, return popular products
         if not recent_orders:
-            return get_popular_products()
+            print("No recent orders, getting popular products...")
+            popular_products = get_popular_products()
+            print(f"Found {len(popular_products)} popular products")
+            return popular_products
         
+        print(f"Processing {len(recent_orders)} recent orders...")
         # Extract categories and price ranges from recent orders
         categories = set()
         price_ranges = []
@@ -182,10 +199,15 @@ def get_recommendations(recent_orders):
                     categories.add(product.get("category"))
                     price_ranges.append(product.get("price", 0))
         
+        print(f"Found categories: {categories}")
+        print(f"Price ranges: {price_ranges}")
+        
         # Calculate average price range
         avg_price = sum(price_ranges) / len(price_ranges) if price_ranges else 0
         price_min = avg_price * 0.7
         price_max = avg_price * 1.3
+        
+        print(f"Price range: {price_min} - {price_max}")
         
         # Get recommendations based on categories and price range
         recommendations = list(products_collection.find({
@@ -193,30 +215,58 @@ def get_recommendations(recent_orders):
             "price": {"$gte": price_min, "$lte": price_max}
         }).limit(8))
         
+        print(f"Found {len(recommendations)} recommendations based on categories and price")
+        
         # If not enough recommendations, add popular products
         if len(recommendations) < 8:
+            print("Not enough recommendations, adding popular products...")
             popular_products = get_popular_products()
             recommendations.extend(popular_products[:8 - len(recommendations)])
+            print(f"Total recommendations after adding popular products: {len(recommendations)}")
         
-        return recommendations
+        # Serialize ObjectId to string for each recommendation
+        serialized_recommendations = []
+        for product in recommendations:
+            product['_id'] = str(product['_id'])
+            serialized_recommendations.append(product)
+        
+        print(f"Returning {len(serialized_recommendations)} serialized recommendations")
+        return serialized_recommendations
         
     except Exception as e:
         print(f"Error in get_recommendations: {str(e)}")
-        return get_popular_products()
+        print("Falling back to popular products...")
+        popular_products = get_popular_products()
+        print(f"Found {len(popular_products)} fallback popular products")
+        return popular_products
 
 def get_popular_products():
     """
     Get popular products based on ratings and number of reviews.
     """
     try:
-        return list(products_collection.find({
+        products = list(products_collection.find({
             "rating": {"$gte": 4.0},
             "numReviews": {"$gte": 10}
         }).sort("rating", -1).limit(8))
+        
+        # Serialize ObjectId to string for each product
+        serialized_products = []
+        for product in products:
+            product['_id'] = str(product['_id'])
+            serialized_products.append(product)
+        
+        return serialized_products
     except Exception as e:
         print(f"Error in get_popular_products: {str(e)}")
         # Fallback to random products if there's an error
-        return list(products_collection.find().limit(8))
+        fallback_products = list(products_collection.find().limit(8))
+        # Serialize fallback products too
+        serialized_fallback = []
+        for product in fallback_products:
+            product['_id'] = str(product['_id'])
+            serialized_fallback.append(product)
+        return serialized_fallback
 
 def get_similar_products(product_id):
     """

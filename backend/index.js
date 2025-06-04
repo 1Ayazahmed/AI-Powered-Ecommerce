@@ -15,6 +15,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import recommendationRoutes from './routes/recommendationRoutes.js';
 import aiRoutes from './routes/ai.routes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
 
 
 // Handle __dirname for ES Modules
@@ -27,14 +28,17 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// Load .env variables
-dotenv.config();
+// Load .env variables from the correct location
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Debug: Print all relevant backend env variables
-console.log("Upload directory path:", uploadDir); //
+console.log("Attempting to load .env from:", path.join(__dirname, '.env'));
+console.log("MONGO_URI after dotenv config:", process.env.MONGO_URI);
+
 // Debug: Print all relevant backend env variables
-// console.log("MONGO_URI:", process.env.MONGO_URI); // Should print your MongoDB URI
-// console.log("JWT_SECRET:", process.env.JWT_SECRET); // Should print your JWT secret
+// console.log("Upload directory path:", uploadDir); //
+// Debug: Print all relevant backend env variables
+// console.log("JWT_SECRET:", process.env.JWT_SECRET); // Should print your MongoDB URI
 // console.log("CWD:", process.cwd());
 // console.log("ENV FILE EXISTS:", fs.existsSync(process.cwd() + '/.env'));
 
@@ -49,7 +53,7 @@ const app = express();
 // Middleware
 
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -61,6 +65,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/orders", orderRoutes);
 app.use('/api', recommendationRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 console.log('Registering AI routes under /api/ai_features_test', aiRoutes);
 app.use('/api/ai_features_test', aiRoutes);
@@ -80,39 +85,66 @@ if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
 }
 
-// List files in uploads directory
-// console.log("Files in uploads directory:", fs.readdirSync(uploadsPath));
-
 // Serve static files with more explicit configuration
-app.use("/uploads", express.static(uploadsPath, {
-  setHeaders: (res, path) => {
+app.use("/uploads", (req, res, next) => {
+  console.log(`Static file request: ${req.method} ${req.url}`);
+  const filePath = path.join(uploadsPath, req.url);
+  console.log(`Attempting to serve file: ${filePath}`);
+  
+  if (fs.existsSync(filePath)) {
+    console.log(`File exists: ${filePath}`);
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     res.set('Access-Control-Allow-Origin', '*');
-    console.log("Serving file:", path);
-  },
-  dotfiles: 'allow',
-  index: false
-}));
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error(`Error sending file ${filePath}:`, err);
+        res.status(err.status || 500).json({ error: 'Failed to send file', details: err.message });
+      } else {
+        console.log(`Successfully sent file ${filePath}`);
+      }
+    });
+  } else {
+    console.log(`File not found: ${filePath}`);
+    res.status(404).json({
+      error: "File not found",
+      path: filePath,
+      exists: fs.existsSync(filePath)
+    });
+  }
+});
 
 // Add a test route to check if static files are being served
 app.get("/test-uploads", (req, res) => {
+  console.log(`Test uploads request: ${req.method} ${req.url}`);
   const files = fs.readdirSync(uploadsPath);
-  res.json({
+  const uploadsInfo = {
     uploadsPath,
     files,
     exists: fs.existsSync(uploadsPath),
     absolutePath: path.resolve(uploadsPath)
-  });
+  };
+  console.log('Test uploads response:', uploadsInfo);
+  res.json(uploadsInfo);
 });
 
 // Add a test route to directly serve an image
 app.get("/test-image/:filename", (req, res) => {
+  console.log(`Test image request: ${req.method} ${req.url}`);
   const filename = req.params.filename;
   const filePath = path.join(uploadsPath, filename);
   
   if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
+    console.log(`File exists for test-image: ${filePath}`);
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error(`Error sending file ${filePath} via test-image route:`, err);
+        res.status(err.status || 500).json({ error: 'Failed to send file', details: err.message });
+      } else {
+        console.log(`Successfully sent file ${filePath} via test-image route.`);
+      }
+    });
   } else {
+    console.log(`File not found for test-image: ${filePath}`);
     res.status(404).json({
       error: "File not found",
       path: filePath,

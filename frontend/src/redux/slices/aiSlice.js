@@ -4,10 +4,18 @@ import axios from 'axios';
 // Async thunks
 export const fetchRecommendations = createAsyncThunk(
   'ai/fetchRecommendations',
-  async (_, { rejectWithValue }) => {
+  async ({ userId, orderHistory }, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/api/ai_features_test/recommendations');
-      return response.data.recommendations;
+      // Now making a POST request to the personalized recommendations endpoint
+      const response = await axios.post('/api/ai_features_test/get-personalized-recommendations', {
+          userId,
+          orderHistory
+      });
+      // Assuming the backend now returns prices in PKR
+      return response.data.recommendations.map(product => ({
+         ...product,
+         currency: 'PKR' // Indicate currency is PKR
+      }));
     } catch (error) {
       return rejectWithValue(error.response.data);
     }

@@ -11,6 +11,8 @@ import {
   findOrderById,
   markOrderAsPaid,
   markOrderAsDelivered,
+  deleteOrder,
+  markOrderAsApproved,
 } from "../controllers/orderController.js";
 
 import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
@@ -29,5 +31,9 @@ router.route("/:id/pay").put(authenticate, markOrderAsPaid);
 router
   .route("/:id/deliver")
   .put(authenticate, authorizeAdmin, markOrderAsDelivered);
+router
+  .route("/:id/approve")
+  .put(authenticate, authorizeAdmin, markOrderAsApproved);
+router.route("/:id").delete(authenticate, authorizeAdmin, deleteOrder);
 
 export default router;

@@ -86,51 +86,53 @@ const CategoryList = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Category delection failed. Tray again.");
+      toast.error("Category deletion failed. Try again.");
     }
   };
 
   return (
-    <div className="ml-[10rem] flex flex-col md:flex-row">
-      <AdminMenu />
-      <div className="md:w-3/4 p-3">
-        <div className="h-12">Manage Categories</div>
-        <CategoryForm
-          value={name}
-          setValue={setName}
-          handleSubmit={handleCreateCategory}
-        />
-        <br />
-        <hr />
+    <div className="container mx-auto p-4 md:p-6">
+      <div className="flex flex-col md:flex-row">
+        <AdminMenu />
+        <div className="w-full md:w-3/4 p-3">
+          <h1 className="text-xl md:text-2xl font-bold mb-4">Manage Categories</h1>
+          
+          <div className="bg-[#1C1C1C] p-4 rounded-lg mb-6">
+            <CategoryForm
+              value={name}
+              setValue={setName}
+              handleSubmit={handleCreateCategory}
+            />
+          </div>
 
-        <div className="flex flex-wrap">
-          {categories?.map((category) => (
-            <div key={category._id}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {categories?.map((category) => (
               <button
-                className="bg-white border border-pink-500 text-pink-500 py-2 px-4 rounded-lg m-3 hover:bg-pink-500 hover:text-white focus:outline-none foucs:ring-2 focus:ring-pink-500 focus:ring-opacity-50"
+                key={category._id}
+                className="bg-[#1C1C1C] border border-pink-500 text-pink-500 py-2 px-3 md:px-4 rounded-lg hover:bg-pink-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 w-full text-sm md:text-base transition-colors duration-200"
                 onClick={() => {
-                  {
-                    setModalVisible(true);
-                    setSelectedCategory(category);
-                    setUpdatingName(category.name);
-                  }
+                  setModalVisible(true);
+                  setSelectedCategory(category);
+                  setUpdatingName(category.name);
                 }}
               >
                 {category.name}
               </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)}>
-          <CategoryForm
-            value={updatingName}
-            setValue={(value) => setUpdatingName(value)}
-            handleSubmit={handleUpdateCategory}
-            buttonText="Update"
-            handleDelete={handleDeleteCategory}
-          />
-        </Modal>
+          <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)}>
+            <div className="bg-[#1C1C1C] p-4 rounded-lg">
+              <CategoryForm
+                value={updatingName}
+                setValue={(value) => setUpdatingName(value)}
+                handleSubmit={handleUpdateCategory}
+                buttonText="Update"
+                handleDelete={handleDeleteCategory}
+              />
+            </div>
+          </Modal>
+        </div>
       </div>
     </div>
   );

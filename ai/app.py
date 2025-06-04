@@ -12,6 +12,14 @@ import numpy as np
 import pandas as pd
 import os
 from dotenv import load_dotenv
+import requests # Import requests to fetch exchange rates
+from recommendation_model import get_recommendations as get_personalized_recommendations_python
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+import logging
+
+# Import the actual prediction function
+from predictive_analytics import predict_next_purchase
 
 # Load environment variables
 load_dotenv()
@@ -30,6 +38,31 @@ try:
 except Exception as e:
     print(f"❌ MongoDB connection error: {str(e)}")
     raise
+
+# Function to fetch exchange rates
+def get_exchange_rate(from_currency, to_currency):
+    try:
+        # Using the same API as frontend, relative to PKR
+        response = requests.get('https://open.er-api.com/v6/latest/PKR')
+        data = response.json()
+        if data['result'] == 'success' and to_currency in data['rates'] and from_currency in data['rates']:
+            # Convert from_currency to PKR, then PKR to to_currency
+            # To convert from USD to PKR, we need 1 / rate_for_USD_in_PKR
+            if data['rates'].get(from_currency, 0) == 0:
+                 print(f"Warning: Exchange rate for {from_currency} is 0.")
+                 return None # Cannot divide by zero
+            rate_from_pkr = data['rates'][from_currency]
+            # Conversion rate from FROM to TO currency is (Rate of TO relative to PKR) / (Rate of FROM relative to PKR)
+            # We need FROM=USD, TO=PKR. So Rate is 1 / Rate of USD relative to PKR
+            conversion_rate = 1 / rate_from_pkr
+            print(f"Fetched exchange rate: 1 {from_currency} = {conversion_rate} {to_currency}")
+            return conversion_rate
+        else:
+            print(f"Error fetching exchange rates or currencies not found: {data}")
+            return None
+    except Exception as e:
+        print(f"Error fetching exchange rates: {e}")
+        return None
 
 # Chatbot patterns and responses
 PATTERNS = {
@@ -140,13 +173,13 @@ def get_recommendations(recent_orders):
 def get_popular_products():
     """Get popular products based on ratings."""
     try:
-        return list(products_collection.find({
-            "rating": {"$gte": 4.0},
-            "numReviews": {"$gte": 10}
-        }).sort("rating", -1).limit(8))
+        # Modified to return the first 8 products found
+        print("Fetching first 8 products as popular fallback...")
+        return list(products_collection.find().limit(8))
     except Exception as e:
         print(f"Error in get_popular_products: {str(e)}")
-        return list(products_collection.find().limit(8))
+        # Fallback to an empty list if even this fails
+        return []
 
 def get_analytics(time_range):
     """Generate analytics data for the specified time range."""
@@ -233,27 +266,224 @@ def chatbot():
 @app.route("/api/recommendations", methods=["GET"])
 def get_product_recommendations():
     try:
-        recent_orders = list(orders_collection.find().limit(5))
-        recommendations = get_recommendations(recent_orders)
+        # This endpoint can remain for default recommendations if needed elsewhere
+        # It will now return prices in PKR
+        recent_orders = list(orders_collection.find().limit(5)) # Example: maybe use some criteria for default?
+        recommendations_usd = get_personalized_recommendations_python([]) # Assuming this returns prices in USD
+        
+        # Convert prices from USD to PKR
+        usd_to_pkr_rate = get_exchange_rate('USD', 'PKR')
         
         formatted_recommendations = []
-        for product in recommendations:
-            formatted_recommendations.append({
-                "id": str(product["_id"]),
-                "name": product["name"],
-                "description": product["description"],
-                "price": product["price"],
-                "image": product["image"],
-                "rating": product.get("rating", 4.5),
-                "reviews": product.get("numReviews", random.randint(10, 100))
-            })
+        for product in recommendations_usd:
+            # Ensure product has an _id and price before attempting to convert
+            if "_id" in product and "price" in product and usd_to_pkr_rate is not None:
+                price_pkr = product['price'] * usd_to_pkr_rate
+                formatted_recommendations.append({
+                    "id": str(product["_id"]),
+                    "name": product["name"],
+                    "description": product["description"],
+                    "price": round(price_pkr, 2), # Round to 2 decimal places
+                    "image": product["image"],
+                    "rating": product.get("rating", 4.5),
+                    "reviews": product.get("numReviews", random.randint(10, 100)),
+                    "currency": 'PKR' # Indicate currency is now PKR
+                })
+            elif "_id" in product:
+                 # If conversion fails, still include product but log warning
+                 print(f"Warning: Could not convert price for product {product.get('name', '')}. Returning original price in USD.")
+                 formatted_recommendations.append({
+                    "id": str(product["_id"]),
+                    "name": product["name"],
+                    "description": product["description"],
+                    "price": product.get('price', 0), # Return original price
+                    "image": product["image"],
+                    "rating": product.get("rating", 4.5),
+                    "reviews": product.get("numReviews", random.randint(10, 100)),
+                    "currency": 'USD' # Indicate original currency
+                 })
+            else:
+                 print("Skipping product without _id:", product);
 
-        return jsonify({"recommendations": formatted_recommendations})
+
+        print('Returning recommendations from /api/recommendations (likely default) in PKR:', len(formatted_recommendations));
+        return jsonify({ "recommendations": formatted_recommendations });
 
     except Exception as e:
-        print("🔥 ERROR during recommendations:")
+        print("🔥 ERROR during default recommendations:")
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        # Fallback to simpler default on error, returning prices in USD if conversion fails
+        try:
+            simple_default = list(products_collection.find().limit(8))
+            formatted_default = []
+            for product in simple_default:
+                 if "_id" in product:
+                    formatted_default.append({
+                        "id": str(product["_id"]),
+                        "name": product["name"],
+                        "description": product["description"],
+                        "price": product.get('price', 0), # Assume original is USD
+                        "image": product["image"],
+                        "rating": product.get("rating", 4.0),
+                        "reviews": product.get("numReviews", 5),
+                        "currency": 'USD' # Indicate original currency is USD
+                    })
+                 else:
+                    print("Skipping fallback product without _id:", product);
+
+            return jsonify({ "error": str(e), "recommendations": formatted_default }), 500
+        except Exception as e:
+            print("🔥 ERROR during simple default fallback:", e)
+            return jsonify({ "error": "Failed to fetch recommendations" }), 500
+
+# New endpoint for personalized recommendations called by Node.js backend
+@app.route("/get-personalized-recommendations", methods=["POST"])
+def get_personalized_recommendations_endpoint():
+    try:
+        data = request.get_json()
+        user_id = data.get("userId")
+        order_history = data.get("orderHistory")
+
+        # Get exchange rate for USD to PKR
+        usd_to_pkr_rate = get_exchange_rate('USD', 'PKR')
+
+        if not user_id or not order_history:
+            print("Missing userId or orderHistory for personalized recommendations. Falling back to popular products.")
+            # Fallback to getting popular products if user data is missing
+            # These popular products are assumed to have prices in USD from the database
+            popular_products_usd = get_popular_products() # Use the imported function with empty data
+            print(f"Number of popular products returned by get_popular_products: {len(popular_products_usd)}")
+
+            formatted_recommendations = []
+            for product in popular_products_usd:
+                 # Ensure product has an _id before processing
+                if "_id" in product:
+                    # Convert prices from USD to PKR if rate is available
+                    if "price" in product and usd_to_pkr_rate is not None:
+                        price_pkr = product['price'] * usd_to_pkr_rate
+                        formatted_recommendations.append({
+                            "id": str(product["_id"]),
+                            "name": product["name"],
+                            "description": product["description"],
+                            "price": round(price_pkr, 2), # Round to 2 decimal places
+                            "image": product["image"],
+                            "rating": product.get("rating", 4.0),
+                            "reviews": product.get("numReviews", 5),
+                            "currency": 'PKR' # Indicate currency is now PKR
+                        })
+                    # If conversion fails but _id exists, return original price
+                    elif "price" in product:
+                         print(f"Warning: Could not convert price for fallback product {product.get('name', '')}. Returning original price in USD.")
+                         formatted_recommendations.append({
+                            "id": str(product["_id"]),
+                            "name": product["name"],
+                            "description": product["description"],
+                            "price": product.get('price', 0), # Return original price
+                            "image": product["image"],
+                            "rating": product.get("rating", 4.0),
+                            "reviews": product.get("numReviews", 5),
+                            "currency": 'USD' # Indicate original currency
+                        })
+                    else:
+                         print("Skipping fallback product without price but with _id:", product);
+                else:
+                    print("Skipping fallback product without _id:", product);
+
+            print(f"Number of formatted recommendations after fallback: {len(formatted_recommendations)}")
+            print('Returning popular products from /get-personalized-recommendations (due to missing user data) in PKR (if converted):', len(formatted_recommendations))
+            return jsonify({ "recommendations": formatted_recommendations });
+
+
+        print(f"Received personalized recommendations request for user: {user_id}");
+        # Assuming orderHistory is already processed by Node.js backend
+        recommendations_usd = get_personalized_recommendations_python(order_history) # Call the imported function (assuming it returns USD)
+        print(f"Number of personalized recommendations returned by get_personalized_recommendations_python: {len(recommendations_usd)}")
+
+        formatted_recommendations = []
+        for product in recommendations_usd:
+            # Ensure product has an _id before processing
+            if "_id" in product:
+                # Attempt to convert price if rate is available
+                if "price" in product and usd_to_pkr_rate is not None:
+                    price_pkr = product['price'] * usd_to_pkr_rate
+                    formatted_recommendations.append({
+                        "id": str(product["_id"]),
+                        "name": product["name"],
+                        "description": product["description"],
+                        "price": round(price_pkr, 2), # Round to 2 decimal places
+                        "image": product["image"],
+                        "rating": product.get("rating", 4.5),
+                        "reviews": product.get("numReviews", random.randint(10, 100)),
+                        "currency": 'PKR' # Indicate currency is now PKR
+                    })
+                # If conversion fails but _id exists, return original price
+                elif "price" in product:
+                    print(f"Warning: Could not convert price for product {product.get('name', '')}. Returning original price in USD.")
+                    formatted_recommendations.append({
+                        "id": str(product["_id"]),
+                        "name": product["name"],
+                        "description": product["description"],
+                        "price": product.get('price', 0), # Return original price
+                        "image": product["image"],
+                        "rating": product.get("rating", 4.5),
+                        "reviews": product.get("numReviews", random.randint(10, 100)),
+                        "currency": 'USD' # Indicate original currency
+                    })
+                else:
+                    print("Skipping product without price but with _id:", product);
+            else:
+                print("Skipping product without _id:", product);
+
+        print(f"Number of formatted personalized recommendations: {len(formatted_recommendations)}")
+        print('Returning personalized recommendations in PKR (if converted):', len(formatted_recommendations))
+        return jsonify({ "recommendations": formatted_recommendations });
+
+    except Exception as e:
+        print("🔥 ERROR during personalized recommendations:")
+        traceback.print_exc()
+        # Fallback to returning popular products on error
+        try:
+            popular_products_usd = get_popular_products() # Use the imported function for fallback (assuming it returns USD)
+
+            formatted_recommendations = []
+            for product in popular_products_usd:
+                # Ensure product has an _id before processing
+                if "_id" in product:
+                    # Convert prices from USD to PKR if rate is available
+                    if "price" in product and usd_to_pkr_rate is not None:
+                        price_pkr = product['price'] * usd_to_pkr_rate
+                        formatted_recommendations.append({
+                            "id": str(product["_id"]),
+                            "name": product["name"],
+                            "description": product["description"],
+                            "price": round(price_pkr, 2), # Round to 2 decimal places
+                            "image": product["image"],
+                            "rating": product.get("rating", 4.0),
+                            "reviews": product.get("numReviews", 5),
+                            "currency": 'PKR' # Indicate currency is now PKR
+                        })
+                    # If conversion fails but _id exists, return original price
+                    elif "price" in product:
+                        print(f"Warning: Could not convert price for fallback product {product.get('name', '')}. Returning original price in USD.")
+                        formatted_recommendations.append({
+                            "id": str(product["_id"]),
+                            "name": product["name"],
+                            "description": product["description"],
+                            "price": product.get('price', 0), # Return original price
+                            "image": product["image"],
+                            "rating": product.get("rating", 4.0),
+                            "reviews": product.get("reviews", 5),
+                            "currency": 'USD' # Indicate original currency
+                        })
+                    else:
+                         print("Skipping fallback product without price but with _id:", product);
+                else:
+                    print("Skipping fallback product without _id:", product);
+
+            return jsonify({ "error": str(e), "recommendations": formatted_recommendations }), 500
+        except Exception as e:
+            print("🔥 ERROR during personalized recommendations fallback:", e)
+            return jsonify({ "error": "Failed to fetch personalized recommendations" }), 500
 
 @app.route("/api/analytics", methods=["GET"])
 def get_predictive_analytics():
@@ -301,5 +531,66 @@ def get_predictive_analytics():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/users", methods=["GET"])
+def list_users():
+    try:
+        users = list(users_collection.find())
+        for user in users:
+            user['id'] = str(user['_id'])
+            del user['_id']
+        print("Returning users from /api/users:", users)
+        return jsonify(users)
+    except Exception as e:
+        print("🔥 ERROR during listing users:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/debug-users", methods=["GET"])
+def debug_users():
+    try:
+        users = list(users_collection.find().limit(5))
+        # Convert ObjectId to string for JSON serialization
+        for user in users:
+            user['_id'] = str(user['_id'])
+        print("Debug users endpoint hit. Returning:", users)
+        return jsonify(users)
+    except Exception as e:
+        print("🔥 ERROR during debug user listing:", e)
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+# Predictive Analytics Endpoint
+@app.route("/predict", methods=["POST", "OPTIONS"])
+def predict_next_purchase_endpoint():
+    if request.method == 'OPTIONS':
+        # Respond to CORS preflight request
+        return '', 200
+
+    # Only attempt to get JSON data for POST requests
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            user_id = data.get("userId")
+
+            if not user_id:
+                return jsonify({"error": "User ID not provided"}), 400
+
+            # Call the actual prediction function
+            prediction_result = predict_next_purchase(user_id)
+
+            if not prediction_result:
+                 return jsonify({"error": "Could not generate prediction, insufficient data"}), 400
+
+            print("Returning prediction data:", prediction_result)
+            return jsonify(prediction_result)
+
+        except Exception as e:
+            print("🔥 ERROR during prediction POST request processing:")
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    # If not OPTIONS or POST, return Method Not Allowed
+    return jsonify({"error": "Method not allowed"}), 405
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5004)

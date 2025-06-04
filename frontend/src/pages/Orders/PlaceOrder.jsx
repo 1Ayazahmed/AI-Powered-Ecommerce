@@ -12,6 +12,7 @@ const PlaceOrder = () => {
   const navigate = useNavigate();
 
   const cart = useSelector((state) => state.cart);
+  const { currentCurrency, exchangeRates } = useSelector((state) => state.currency);
 
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();
 
@@ -22,6 +23,45 @@ const PlaceOrder = () => {
   }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
 
   const dispatch = useDispatch();
+
+  const convertPrice = (priceInUSD) => {
+    console.log("convertPrice called with priceInUSD:", priceInUSD);
+    console.log("currentCurrency:", currentCurrency);
+    console.log("exchangeRates:", exchangeRates);
+
+    if (currentCurrency === "USD" || !exchangeRates || !exchangeRates.USD) {
+      // If target is USD, or exchange rate for USD is not available
+      console.log("Converting to USD or rate not available");
+      return `$${priceInUSD?.toFixed(2)}`;
+    } else {
+      console.log("--- Starting USD to Target Conversion ---");
+      console.log("Price in USD before PKR conversion:", priceInUSD);
+      // First, convert USD to the base currency (PKR)
+      const usdToPkrRate = 1 / exchangeRates.USD; // Rate for 1 USD in PKR
+      const priceInPKR = Number(priceInUSD) * Number(usdToPkrRate);
+      console.log("USD to PKR Rate:", usdToPkrRate);
+      console.log("Price in PKR:", priceInPKR);
+
+      if (currentCurrency === "PKR") {
+        console.log("Target Currency is PKR, returning price in PKR");
+        console.log("--- Ending USD to Target Conversion ---");
+        return `PKR ${priceInPKR?.toFixed(2)}`;
+      } else if (exchangeRates[currentCurrency]) {
+        // Then, convert from the base currency (PKR) to the target currency
+        const pkrToTargetRate = exchangeRates[currentCurrency]; // Rate for 1 PKR in target currency
+        const convertedPrice = priceInPKR * pkrToTargetRate;
+        console.log("PKR to Target Rate:", pkrToTargetRate);
+        console.log("Converted Price:", convertedPrice);
+        console.log("--- Ending USD to Target Conversion ---");
+        return `${currentCurrency} ${convertedPrice.toFixed(2)}`;
+      } else {
+        // Fallback to displaying in USD if target currency rate is not available
+        console.warn(`Exchange rate for ${currentCurrency} not available.`);
+        console.log("--- Ending USD to Target Conversion (Fallback) ---");
+        return `$${priceInUSD?.toFixed(2)}`;
+      }
+    }
+  };
 
   const placeOrderHandler = async () => {
     try {
@@ -76,9 +116,9 @@ const PlaceOrder = () => {
                       <Link to={`/product/${item.product}`}>{item.name}</Link>
                     </td>
                     <td className="p-2">{item.qty}</td>
-                    <td className="p-2">{item.price.toFixed(2)}</td>
+                    <td className="p-2">DEBUG_PRICE:{convertPrice(item.price)}</td>
                     <td className="p-2">
-                      $ {(item.qty * item.price).toFixed(2)}
+                      DEBUG_TOTAL:{convertPrice(item.qty * item.price)}
                     </td>
                   </tr>
                 ))}
@@ -92,20 +132,20 @@ const PlaceOrder = () => {
           <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
             <ul className="text-lg">
               <li>
-                <span className="font-semibold mb-4">Items:</span> $
-                {cart.itemsPrice}
+                <span className="font-semibold mb-4">Items:</span>
+                {console.log("Items price before convertPrice:", cart.itemsPrice)}{convertPrice(cart.itemsPrice)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Shipping:</span> $
-                {cart.shippingPrice}
+                <span className="font-semibold mb-4">Shipping:</span>
+                {console.log("Shipping price before convertPrice:", cart.shippingPrice)}{convertPrice(cart.shippingPrice)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Tax:</span> $
-                {cart.taxPrice}
+                <span className="font-semibold mb-4">Tax:</span>
+                {console.log("Tax price before convertPrice:", cart.taxPrice)}{convertPrice(cart.taxPrice)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Total:</span> $
-                {cart.totalPrice}
+                <span className="font-semibold mb-4">Total:</span>
+                {console.log("Total price before convertPrice:", cart.totalPrice)}{convertPrice(cart.totalPrice)}&nbsp;
               </li>
             </ul>
 

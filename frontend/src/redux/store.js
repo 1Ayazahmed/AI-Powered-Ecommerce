@@ -7,6 +7,7 @@ import cartSliceReducer from "../redux/features/cart/cartSlice";
 import shopReducer from "../redux/features/shop/shopSlice";
 import { getFavoritesFromLocalStorage } from "../Utils/localStorage";
 import aiReducer from './slices/aiSlice';
+import currencyReducer from './slices/currencySlice';
 
 const initialFavorites = getFavoritesFromLocalStorage() || [];
 
@@ -18,6 +19,7 @@ const store = configureStore({
     cart: cartSliceReducer,
     shop: shopReducer,
     ai: aiReducer,
+    currency: currencyReducer,
   },
 
   preloadedState: {

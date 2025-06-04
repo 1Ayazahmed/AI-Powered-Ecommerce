@@ -32,6 +32,10 @@ const productSchema = mongoose.Schema(
     numReviews: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true, default: 0 },
     countInStock: { type: Number, required: true, default: 0 },
+    quantity: { type: Number, required: true, default: 0 },
+    discountPercentage: { type: Number, required: false, default: 0 },
+    isFreeDelivery: { type: Boolean, required: false, default: false },
+    discountedPrice: { type: Number, required: false },
   },
   { timestamps: true }
 );

@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaRobot } from 'react-icons/fa';
+import { FaPaperPlane, FaRobot, FaCompress, FaExpand } from 'react-icons/fa';
 import axios from 'axios';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -41,11 +42,42 @@ const Chatbot = () => {
     }
   };
 
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 w-96 bg-gray-900 rounded-lg shadow-xl flex flex-col text-gray-100">
+        <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center justify-between">
+          <div className="flex items-center">
+            <FaRobot className="mr-2" />
+            <h3 className="font-semibold">AI Assistant</h3>
+          </div>
+          <button
+            onClick={toggleMinimize}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <FaExpand />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-gray-900 rounded-lg shadow-xl flex flex-col text-gray-100">
-      <div className="bg-gray-800 text-white p-4 rounded-t-lg flex items-center">
-        <FaRobot className="mr-2" />
-        <h3 className="font-semibold">AI Assistant</h3>
+      <div className="bg-gray-800 text-white p-4 rounded-t-lg flex items-center justify-between">
+        <div className="flex items-center">
+          <FaRobot className="mr-2" />
+          <h3 className="font-semibold">AI Assistant</h3>
+        </div>
+        <button
+          onClick={toggleMinimize}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          <FaCompress />
+        </button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-800">

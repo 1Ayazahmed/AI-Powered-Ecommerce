@@ -26,6 +26,7 @@ const Order = () => {
   const [deliverOrder, { isLoading: loadingDeliver }] =
     useDeliverOrderMutation();
   const { userInfo } = useSelector((state) => state.auth);
+  const { currentCurrency, exchangeRates } = useSelector((state) => state.currency);
 
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
@@ -34,6 +35,16 @@ const Order = () => {
     isLoading: loadingPaPal,
     error: errorPayPal,
   } = useGetPaypalClientIdQuery();
+
+  const convertPrice = (priceInPKR) => {
+    if (currentCurrency === "PKR" || !exchangeRates || !exchangeRates[currentCurrency]) {
+      return `PKR ${priceInPKR?.toFixed(2)}`;
+    } else {
+      const rate = exchangeRates[currentCurrency];
+      const convertedPrice = priceInPKR * rate;
+      return `${currentCurrency} ${convertedPrice.toFixed(2)}`;
+    }
+  };
 
   useEffect(() => {
     if (!errorPayPal && !loadingPaPal && paypal.clientId) {
@@ -71,7 +82,7 @@ const Order = () => {
   function createOrder(data, actions) {
     return actions.order
       .create({
-        purchase_units: [{ amount: { value: order.totalPrice } }],
+        purchase_units: [{ amount: { value: order.totalPrice, currency_code: "PKR" } }],
       })
       .then((orderID) => {
         return orderID;
@@ -126,9 +137,9 @@ const Order = () => {
                       </td>
 
                       <td className="p-2 text-center">{item.qty}</td>
-                      <td className="p-2 text-center">{item.price}</td>
+                      <td className="p-2 text-center">{convertPrice(item.price)}</td>
                       <td className="p-2 text-center">
-                        $ {(item.qty * item.price).toFixed(2)}
+                        {convertPrice(item.qty * item.price)}
                       </td>
                     </tr>
                   ))}
@@ -176,37 +187,42 @@ const Order = () => {
         <h2 className="text-xl font-bold mb-2 mt-[3rem]">Order Summary</h2>
         <div className="flex justify-between mb-2">
           <span>Items</span>
-          <span>$ {order.itemsPrice}</span>
+          <span>{convertPrice(order.itemsPrice)}</span>
         </div>
         <div className="flex justify-between mb-2">
           <span>Shipping</span>
-          <span>$ {order.shippingPrice}</span>
+          <span>{convertPrice(order.shippingPrice)}</span>
         </div>
         <div className="flex justify-between mb-2">
           <span>Tax</span>
-          <span>$ {order.taxPrice}</span>
+          <span>{convertPrice(order.taxPrice)}</span>
         </div>
         <div className="flex justify-between mb-2">
           <span>Total</span>
-          <span>$ {order.totalPrice}</span>
+          <span>{convertPrice(order.totalPrice)}</span>
         </div>
 
-        {!order.isPaid && (
+        {!order.isPaid && order.paymentMethod === 'PayPal' && (
           <div>
             {loadingPay && <Loader />}{" "}
             {isPending ? (
               <Loader />
             ) : (
               <div>
-                <div>
-                  <PayPalButtons
-                    createOrder={createOrder}
-                    onApprove={onApprove}
-                    onError={onError}
-                  ></PayPalButtons>
-                </div>
+                <PayPalButtons
+                  createOrder={createOrder}
+                  onApprove={onApprove}
+                  onError={onError}
+                ></PayPalButtons>
               </div>
             )}
+          </div>
+        )}
+
+        {!order.isPaid && order.paymentMethod === 'Cash on Delivery' && (
+          <div className="text-center p-4 bg-gray-100 rounded">
+            <p className="text-lg font-semibold">Cash on Delivery</p>
+            <p className="text-sm text-gray-600">Please pay when you receive your order.</p>
           </div>
         )}
 
@@ -222,6 +238,22 @@ const Order = () => {
             </button>
           </div>
         )}
+
+        {userInfo &&
+          userInfo.isAdmin &&
+          !order.isApproved && (
+            <button
+              type="button"
+              className="bg-green-500 text-white mt-2"
+              onClick={() => {
+                console.log('Mark as Approved clicked for order:', orderId);
+                 toast.info('Mark as Approved functionality to be implemented.');
+              }}
+            >
+              Mark As Approved
+            </button>
+          )}
+
       </div>
     </div>
   );
