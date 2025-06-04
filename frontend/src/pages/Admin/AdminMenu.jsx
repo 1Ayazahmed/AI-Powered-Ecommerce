@@ -41,80 +41,80 @@ const AdminMenu = () => {
         </div>
 
         <ul className="list-none mt-2 space-y-2">
-          <li>
-            <NavLink
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/dashboard"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/dashboard"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              Admin Dashboard
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
+              >
+                Admin Dashboard
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/categorylist"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/categorylist"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              Create Category
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
+              >
+                Create Category
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/productlist"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/productlist"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              Create Product
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
+              >
+                Create Product
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/allproductslist"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/allproductslist"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              All Products
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
+              >
+                All Products
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/userlist"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/userlist"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              Manage Users
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
+              >
+                Manage Users
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
               className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
-              to="/admin/orderlist"
-              style={({ isActive }) => ({
-                color: isActive ? "greenyellow" : "white",
-              })}
+                to="/admin/orderlist"
+                style={({ isActive }) => ({
+                  color: isActive ? "greenyellow" : "white",
+                })}
               onClick={() => setIsMenuOpen(false)}
-            >
-              Manage Orders
-            </NavLink>
-          </li>
-        </ul>
-      </section>
+              >
+                Manage Orders
+              </NavLink>
+            </li>
+          </ul>
+        </section>
 
       {isMenuOpen && (
         <div

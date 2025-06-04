@@ -159,9 +159,9 @@ const ProductDetails = () => {
             <div className="flex flex-col md:flex-row items-start md:items-stretch mt-4 md:mt-[2rem] gap-8">
               {/* Product Image */}
               <div className="w-full md:w-1/2 lg:w-2/5">
-                <img
+              <img
                   src={product.image.startsWith('http') ? product.image : `${backendUrl}${product.image}`}
-                  alt={product.name}
+                alt={product.name}
                   className="w-full h-auto object-cover rounded"
                   onError={(e) => {
                     console.error('Image failed to load:', {
@@ -181,87 +181,87 @@ const ProductDetails = () => {
                       e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2NjYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Z3M=';
                     };
                   }}
-                />
+              />
 
                 <HeartIcon product={product} className="absolute top-4 right-4" />
-              </div>
+            </div>
 
               {/* Product Details */}
               <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col justify-between">
                 <h2 className="text-xl md:text-2xl font-semibold">{product.name}</h2>
                 <p className="my-4 text-[#B0B0B0]">
-                  {product.description}
-                </p>
+                {product.description}
+              </p>
 
-                {/* Add AI Description Generator for admin users */}
-                {userInfo?.isAdmin && (
+              {/* Add AI Description Generator for admin users */}
+              {userInfo?.isAdmin && (
                   <div className="mt-4 md:mt-8">
-                    <ProductDescriptionGenerator 
-                      product={product}
-                      onDescriptionUpdate={(newDescription) => {
-                        refetch(); // Refresh product data after update
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Display Price and Discount Information */}
-                <div className="my-4">
-                  {product.discountPercentage > 0 ? (
-                    <>
-                      <p className="text-lg md:text-xl font-bold text-gray-500 line-through"> {/* Original Price */}
-                        {convertPrice(product.price)}
-                      </p>
-                      <p className="text-3xl md:text-5xl font-extrabold text-green-500"> {/* Discounted Price */}
-                        {convertPrice(product.discountedPrice)}
-                      </p>
-                      <span className="text-sm text-green-400">{product.discountPercentage}% Off</span> {/* Discount Percentage */}
-                    </>
-                  ) : (
-                    <p className="text-3xl md:text-5xl font-extrabold">{convertPrice(product.price)}</p> /* Original Price (no discount) */
-                  )}
+                  <ProductDescriptionGenerator 
+                    product={product}
+                    onDescriptionUpdate={(newDescription) => {
+                      refetch(); // Refresh product data after update
+                    }}
+                  />
                 </div>
+              )}
 
-                {/* Free Delivery Indicator */}
-                {product.isFreeDelivery && (
-                  <p className="text-green-500 font-bold mt-2">🚚 Free Delivery</p>
+              {/* Display Price and Discount Information */}
+              <div className="my-4">
+                {product.discountPercentage > 0 ? (
+                  <>
+                      <p className="text-lg md:text-xl font-bold text-gray-500 line-through"> {/* Original Price */}
+                      {convertPrice(product.price)}
+                    </p>
+                      <p className="text-3xl md:text-5xl font-extrabold text-green-500"> {/* Discounted Price */}
+                      {convertPrice(product.discountedPrice)}
+                    </p>
+                    <span className="text-sm text-green-400">{product.discountPercentage}% Off</span> {/* Discount Percentage */}
+                  </>
+                ) : (
+                    <p className="text-3xl md:text-5xl font-extrabold">{convertPrice(product.price)}</p> /* Original Price (no discount) */
                 )}
+              </div>
+
+              {/* Free Delivery Indicator */}
+              {product.isFreeDelivery && (
+                <p className="text-green-500 font-bold mt-2">🚚 Free Delivery</p>
+              )}
 
                 {/* Product Info Grid/Flex */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-4">
                   <div>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
-                      <FaStore className="mr-2 text-white" /> Brand:{" "}
-                      {product.brand}
-                    </h1>
+                    <FaStore className="mr-2 text-white" /> Brand:{" "}
+                    {product.brand}
+                  </h1>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
-                      <FaClock className="mr-2 text-white" /> Added:{" "}
-                      {moment(product.createAt).fromNow()}
-                    </h1>
+                    <FaClock className="mr-2 text-white" /> Added:{" "}
+                    {moment(product.createAt).fromNow()}
+                  </h1>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
-                      <FaStar className="mr-2 text-white" /> Reviews:{" "}
-                      {product.numReviews}
-                    </h1>
-                  </div>
+                    <FaStar className="mr-2 text-white" /> Reviews:{" "}
+                    {product.numReviews}
+                  </h1>
+                </div>
 
                   <div>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
                       <FaStar className="mr-2 text-white" /> Ratings: {product.rating.toFixed(1)} {/* Display average rating */}
-                    </h1>
+                  </h1>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
-                      <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
-                      {product.countInStock}
-                    </h1>
+                    <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
+                    {product.countInStock}
+                  </h1>
                     <h1 className="flex items-center mb-2 text-sm md:text-base">
                       <FaBox className="mr-2 text-white" /> In Stock:{" "}
                       {product.countInStock > 0 ? "In Stock" : "Out of Stock"}
-                    </h1>
-                  </div>
+                  </h1>
                 </div>
+              </div>
 
                 {/* Quantity Selector and Add to Cart Button */}
                 <div className="flex items-center mt-4">
-                  {product.countInStock > 0 && (
+                {product.countInStock > 0 && (
                     <select
                       className="w-24 p-2 border rounded-lg text-black mr-4"
                       value={qty}
@@ -320,7 +320,7 @@ const ProductDetails = () => {
                         onChange={(e) => setFeedbackComment(e.target.value)}
                         required
                       ></textarea>
-                    </div>
+                  </div>
                     <button
                       type="submit"
                       className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 disabled:opacity-50"
@@ -367,13 +367,13 @@ const ProductDetails = () => {
                         required
                       ></textarea>
                     </div>
-                    <button
+                <button
                       type="submit"
                       className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 disabled:opacity-50"
                       disabled={loadingProductReview}
                     >
                       Submit
-                    </button>
+                </button>
                   </form>
                 ) : (
                   <p>Please <Link to="/login">sign in</Link> to write a review.</p>
@@ -412,8 +412,8 @@ const ProductDetails = () => {
                  {/* Assuming Recommendations component handles its own fetching and layout */}
                  {/* Pass the current product ID or category for related recommendations if needed by the component */}
                  <Recommendations currentProductId={productId} />
-              </div>
             </div>
+          </div>
 
           </div>
         </>

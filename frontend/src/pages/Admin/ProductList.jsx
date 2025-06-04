@@ -90,79 +90,79 @@ const ProductList = () => {
           <h1 className="text-xl md:text-2xl font-semibold mb-4">Create Product</h1>
 
           <div className="bg-[#1C1C1C] p-4 rounded-lg">
-            {imageUrl && (
+          {imageUrl && (
               <div className="text-center mb-4">
-                <img
-                  src={imageUrl}
-                  alt="product"
+              <img
+                src={imageUrl}
+                alt="product"
                   className="block mx-auto w-full max-h-[200px] md:max-h-[300px] object-contain rounded"
-                />
-              </div>
-            )}
+              />
+            </div>
+          )}
 
             <div className="mb-4">
               <label className="border border-pink-500 text-pink-500 py-2 px-4 block w-full text-center rounded-lg cursor-pointer hover:bg-pink-500 hover:text-white transition-colors duration-200">
-                {image ? image.name : "Upload Image"}
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={uploadFileHandler}
+              {image ? image.name : "Upload Image"}
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={uploadFileHandler}
                   className="hidden"
-                />
-              </label>
-            </div>
+              />
+            </label>
+          </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm md:text-base mb-2">Name</label>
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     id="name"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                     required
-                  />
-                </div>
+                />
+              </div>
 
                 <div>
                   <label htmlFor="price" className="block text-sm md:text-base mb-2">Price</label>
-                  <input
-                    type="number"
+                <input
+                  type="number"
                     id="price"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
                     required
-                  />
-                </div>
+                />
+              </div>
 
                 <div>
                   <label htmlFor="quantity" className="block text-sm md:text-base mb-2">Quantity</label>
-                  <input
-                    type="number"
+                <input
+                  type="number"
                     id="quantity"
                     min="1"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
                     required
-                  />
-                </div>
+                />
+              </div>
 
                 <div>
                   <label htmlFor="brand" className="block text-sm md:text-base mb-2">Brand</label>
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     id="brand"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
                     required
-                  />
-                </div>
+                />
+              </div>
 
                 <div>
                   <label htmlFor="discountPercentage" className="block text-sm md:text-base mb-2">Discount (%)</label>
@@ -175,38 +175,38 @@ const ProductList = () => {
                     value={discountPercentage}
                     onChange={(e) => setDiscountPercentage(e.target.value)}
                   />
-                </div>
+            </div>
 
                 <div>
                   <label htmlFor="stock" className="block text-sm md:text-base mb-2">Count In Stock</label>
-                  <input
-                    type="number"
+                <input
+                  type="number"
                     id="stock"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    min="0"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  min="0"
                     required
-                  />
-                </div>
+                />
+              </div>
 
-                <div>
+              <div>
                   <label htmlFor="category" className="block text-sm md:text-base mb-2">Category</label>
-                  <select
+                <select
                     id="category"
                     className="p-2 w-full border rounded-lg bg-[#101011] text-white text-sm md:text-base"
-                    onChange={(e) => setCategory(e.target.value)}
-                    value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  value={category}
                     required
-                  >
-                    <option value="">Select a category</option>
-                    {categories?.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                >
+                  <option value="">Select a category</option>
+                  {categories?.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
                 <div className="flex items-center">
                   <label htmlFor="isFreeDelivery" className="flex items-center space-x-2 cursor-pointer text-sm md:text-base">
@@ -232,14 +232,14 @@ const ProductList = () => {
                   rows="4"
                   required
                 ></textarea>
-              </div>
+            </div>
 
-              <button
+            <button
                 type="submit"
                 className="py-2 px-4 mt-4 rounded-lg text-base md:text-lg font-bold bg-pink-600 hover:bg-pink-700 transition-colors duration-200 w-full"
-              >
-                Submit
-              </button>
+            >
+              Submit
+            </button>
             </form>
           </div>
         </div>

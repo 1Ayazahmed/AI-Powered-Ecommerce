@@ -57,7 +57,7 @@ const Navigation = () => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (searchTerm.trim()) {
+    if (searchTerm.trim()) {
         const currentParams = new URLSearchParams(window.location.search);
         if (!(window.location.pathname === '/shop' && currentParams.get('keyword') === searchTerm.trim())) {
              navigate({ pathname: '/shop', search: `?keyword=${searchTerm.trim()}` });
@@ -91,19 +91,19 @@ const Navigation = () => {
         ></div>
       )}
 
-      <div
-        style={{ zIndex: 9999 }}
+    <div
+      style={{ zIndex: 9999 }}
         className={`fixed top-0 left-0 h-full bg-[#000] text-white transition-transform duration-300 ease-in-out ${
           showSidebar ? "translate-x-0 w-[250px]" : "-translate-x-full w-0"
         } md:translate-x-0 md:w-[4%] md:hover:w-[15%] md:flex flex-col justify-between p-4`}
-        id="navigation-container"
-      >
-        <div>
-          <a href="#" className="">
-            <img src="../../../src/media/logo.png" className="" alt="Logo" />
-          </a>
-        </div>
-        <div className="flex flex-col justify-center space-y-4">
+      id="navigation-container"
+    >
+      <div>
+        <a href="#" className="">
+          <img src="../../../src/media/logo.png" className="" alt="Logo" />
+        </a>
+      </div>
+      <div className="flex flex-col justify-center space-y-4">
           <div className="relative mt-[3rem]">
             <input
               type="text"
@@ -115,226 +115,226 @@ const Navigation = () => {
             <AiOutlineSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           </div>
 
-          <Link
-            to="/"
-            className="flex items-center transition-transform transform hover:translate-x-2"
-          >
-            <AiOutlineHome className="mr-2 mt-[3rem]" size={26} />
-            <span className="hidden nav-item-name mt-[3rem]">HOME</span>{" "}
-          </Link>
+        <Link
+          to="/"
+          className="flex items-center transition-transform transform hover:translate-x-2"
+        >
+          <AiOutlineHome className="mr-2 mt-[3rem]" size={26} />
+          <span className="hidden nav-item-name mt-[3rem]">HOME</span>{" "}
+        </Link>
 
-          <Link
-            to="/shop"
-            className="flex items-center transition-transform transform hover:translate-x-2"
-          >
-            <AiOutlineShopping className="mr-2 mt-[3rem]" size={26} />
-            <span className="hidden nav-item-name mt-[3rem]">SHOP</span>{" "}
-          </Link>
+        <Link
+          to="/shop"
+          className="flex items-center transition-transform transform hover:translate-x-2"
+        >
+          <AiOutlineShopping className="mr-2 mt-[3rem]" size={26} />
+          <span className="hidden nav-item-name mt-[3rem]">SHOP</span>{" "}
+        </Link>
 
-          <Link
-            to="/deals"
-            className="flex items-center transition-transform transform hover:translate-x-2"
-          >
-            <span className="mr-2 mt-[3rem]">🔥</span>
-            <span className="hidden nav-item-name mt-[3rem]">DEALS</span>{" "}
-          </Link>
+        <Link
+          to="/deals"
+          className="flex items-center transition-transform transform hover:translate-x-2"
+        >
+          <span className="mr-2 mt-[3rem]">🔥</span>
+          <span className="hidden nav-item-name mt-[3rem]">DEALS</span>{" "}
+        </Link>
 
-          <Link to="/cart" className="flex relative">
-            <div className="flex items-center transition-transform transform hover:translate-x-2">
-              <AiOutlineShoppingCart className="mt-[3rem] mr-2" size={26} />
-              <span className="hidden nav-item-name mt-[3rem]">Cart</span>{" "}
-            </div>
+        <Link to="/cart" className="flex relative">
+          <div className="flex items-center transition-transform transform hover:translate-x-2">
+            <AiOutlineShoppingCart className="mt-[3rem] mr-2" size={26} />
+            <span className="hidden nav-item-name mt-[3rem]">Cart</span>{" "}
+          </div>
 
-            <div className="absolute top-9">
-              {cartItems.length > 0 && (
-                <span>
-                  <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
-                    {cartItems.reduce((a, c) => a + c.qty, 0)}
-                  </span>
+          <div className="absolute top-9">
+            {cartItems.length > 0 && (
+              <span>
+                <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
+                  {cartItems.reduce((a, c) => a + c.qty, 0)}
                 </span>
-              )}
-            </div>
-          </Link>
+              </span>
+            )}
+          </div>
+        </Link>
 
-          <Link to="/favorite" className="flex relative">
-            <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-              <FaHeart className="mt-[3rem] mr-2" size={20} />
-              <span className="hidden nav-item-name mt-[3rem]">
-                Favorites
-              </span>{" "}
-              <FavoritesCount />
-            </div>
-          </Link>
-        </div>
+        <Link to="/favorite" className="flex relative">
+          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
+            <FaHeart className="mt-[3rem] mr-2" size={20} />
+            <span className="hidden nav-item-name mt-[3rem]">
+              Favorites
+            </span>{" "}
+            <FavoritesCount />
+          </div>
+        </Link>
+      </div>
 
-        <div className="relative mt-4">
-          <button
-            onClick={toggleCurrencyDropdown}
-            className="flex items-center text-white focus:outline-none"
+      <div className="relative mt-4">
+        <button
+          onClick={toggleCurrencyDropdown}
+          className="flex items-center text-white focus:outline-none"
+        >
+          <span>{currentCurrency}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={
+              `h-4 w-4 ml-1 ${
+                currencyDropdownOpen ? "transform rotate-180" : ""
+              }`
+            }
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <span>{currentCurrency}</span>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d={currencyDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+            />
+          </svg>
+        </button>
+
+        {currencyDropdownOpen && (
+          <ul className="absolute bottom-full left-0 mb-2 space-y-1 bg-gray-800 text-white rounded-md shadow-lg">
+            {supportedCurrencies.map((currencyCode) => (
+              <li key={currencyCode}>
+                <button
+                  onClick={() => handleCurrencySelect(currencyCode)}
+                  className="block px-4 py-2 hover:bg-gray-700 w-full text-left"
+                >
+                  {currencyCode}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="relative">
+        <button
+          onClick={toggleDropdown}
+          className="flex items-center text-gray-800 focus:outline-none"
+        >
+          {userInfo ? (
+            <span className="text-white">{userInfo.username}</span>
+          ) : (
+            <></>
+          )}
+          {userInfo && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={
                 `h-4 w-4 ml-1 ${
-                  currencyDropdownOpen ? "transform rotate-180" : ""
+                  dropdownOpen ? "transform rotate-180" : ""
                 }`
               }
               fill="none"
               viewBox="0 0 24 24"
-              stroke="currentColor"
+              stroke="white"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d={currencyDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+                d={dropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
               />
             </svg>
-          </button>
-
-          {currencyDropdownOpen && (
-            <ul className="absolute bottom-full left-0 mb-2 space-y-1 bg-gray-800 text-white rounded-md shadow-lg">
-              {supportedCurrencies.map((currencyCode) => (
-                <li key={currencyCode}>
-                  <button
-                    onClick={() => handleCurrencySelect(currencyCode)}
-                    className="block px-4 py-2 hover:bg-gray-700 w-full text-left"
-                  >
-                    {currencyCode}
-                  </button>
-                </li>
-              ))}
-            </ul>
           )}
-        </div>
+        </button>
 
-        <div className="relative">
-          <button
-            onClick={toggleDropdown}
-            className="flex items-center text-gray-800 focus:outline-none"
+        {dropdownOpen && userInfo && (
+          <ul
+            className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${
+              !userInfo.isAdmin ? "-top-20" : "-top-80"
+            } `}
           >
-            {userInfo ? (
-              <span className="text-white">{userInfo.username}</span>
-            ) : (
-              <></>
+            {userInfo.isAdmin && (
+              <>
+                <li>
+                  <Link
+                    to="/admin/dashboard"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/productlist"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Products
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/categorylist"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Category
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/orderlist"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Orders
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/userlist"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Users
+                  </Link>
+                </li>
+              </>
             )}
-            {userInfo && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={
-                  `h-4 w-4 ml-1 ${
-                    dropdownOpen ? "transform rotate-180" : ""
-                  }`
-                }
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="white"
+
+            <li>
+              <Link
+                to="/profile"
+                className="block px-4 py-2 hover:bg-gray-100"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d={dropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                />
-              </svg>
-            )}
-          </button>
+                Profile
+              </Link>
+            </li>
+            <li>
+              <button
+                onClick={logoutHandler}
+                className="block px-4 py-2 hover:bg-gray-100 text-left w-full"
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        )}
 
-          {dropdownOpen && userInfo && (
-            <ul
-              className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${
-                !userInfo.isAdmin ? "-top-20" : "-top-80"
-              } `}
-            >
-              {userInfo.isAdmin && (
-                <>
-                  <li>
-                    <Link
-                      to="/admin/dashboard"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                    >
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/admin/productlist"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                    >
-                      Products
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/admin/categorylist"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                    >
-                      Category
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/admin/orderlist"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                    >
-                      Orders
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/admin/userlist"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                    >
-                      Users
-                    </Link>
-                  </li>
-                </>
-              )}
-
-              <li>
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                >
-                  Profile
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={logoutHandler}
-                  className="block px-4 py-2 hover:bg-gray-100 text-left w-full"
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
-          )}
-
-          {!userInfo && (
-            <ul>
-              <li>
-                <Link
-                  to="/login"
-                  className="flex items-center transition-transform transform hover:translate-x-2"
-                >
-                  <AiOutlineLogin className="mr-2 mt-[3rem]" size={26} />
-                  <span className="hidden nav-item-name mt-[3rem]">LOGIN</span>{" "}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/register"
-                  className="flex items-center transition-transform transform hover:translate-x-2"
-                >
-                  <AiOutlineUserAdd className="mr-2 mt-[3rem]" size={26} />
-                  <span className="hidden nav-item-name mt-[3rem]">
-                    REGISTER
-                  </span>{" "}
-                </Link>
-              </li>
-            </ul>
-          )}
+        {!userInfo && (
+          <ul>
+            <li>
+              <Link
+                to="/login"
+                className="flex items-center transition-transform transform hover:translate-x-2"
+              >
+                <AiOutlineLogin className="mr-2 mt-[3rem]" size={26} />
+                <span className="hidden nav-item-name mt-[3rem]">LOGIN</span>{" "}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/register"
+                className="flex items-center transition-transform transform hover:translate-x-2"
+              >
+                <AiOutlineUserAdd className="mr-2 mt-[3rem]" size={26} />
+                <span className="hidden nav-item-name mt-[3rem]">
+                  REGISTER
+                </span>{" "}
+              </Link>
+            </li>
+          </ul>
+        )}
         </div>
       </div>
     </div>

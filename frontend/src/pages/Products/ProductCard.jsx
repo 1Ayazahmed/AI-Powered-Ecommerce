@@ -9,7 +9,7 @@ import { FaTruck } from "react-icons/fa";
 const ProductCard = ({ p }) => {
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-  
+
   console.log('ProductCard - VITE_BACKEND_URL:', import.meta.env.VITE_BACKEND_URL);
   console.log('ProductCard - backendUrl:', backendUrl);
 

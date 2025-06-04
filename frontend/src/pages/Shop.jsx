@@ -55,7 +55,7 @@ const Shop = () => {
     console.log('Shop.jsx useEffect - errorSearchedProducts:', errorSearchedProducts);
 
     if (!loadingSearchedProducts && searchedProducts) {
-      if (searchTerm) {
+    if (searchTerm) {
         // If searching, use searchedProducts
         if (Array.isArray(searchedProducts.products)) {
           console.log('Shop.jsx useEffect - Setting products from search results:', searchedProducts.products);
@@ -63,20 +63,20 @@ const Shop = () => {
         } else {
           console.log('Shop.jsx useEffect - Search returned no products structure, setting to empty array');
           dispatch(setProducts([]));
-        }
+      }
       } else if (checked.length > 0 || radio.length > 0) {
         // If no search term but filters are applied, use filteredProductsQuery
         if (!filteredProductsQuery.isLoading && filteredProductsQuery.data && Array.isArray(filteredProductsQuery.data)) {
           console.log('Shop.jsx useEffect - Setting products from filter results:', filteredProductsQuery.data);
-          const filteredProducts = filteredProductsQuery.data.filter(
-            (product) => {
-              return (
-                product.price.toString().includes(priceFilter) ||
-                product.price === parseInt(priceFilter, 10)
-              );
-            }
-          );
-          dispatch(setProducts(filteredProducts));
+        const filteredProducts = filteredProductsQuery.data.filter(
+          (product) => {
+            return (
+              product.price.toString().includes(priceFilter) ||
+              product.price === parseInt(priceFilter, 10)
+            );
+          }
+        );
+        dispatch(setProducts(filteredProducts));
         } else {
           console.log('Shop.jsx useEffect - Filter returned no data, setting to empty array');
           dispatch(setProducts([]));

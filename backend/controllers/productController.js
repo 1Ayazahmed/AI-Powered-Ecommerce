@@ -252,7 +252,7 @@ function ensureImageExists(product) {
 const fetchProducts = asyncHandler(async (req, res) => {
   try {
     const pageSize = 6;
-    
+
     // Initialize keyword as an empty object for initial load
     let keyword = {};
 

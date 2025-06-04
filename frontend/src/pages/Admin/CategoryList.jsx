@@ -93,45 +93,45 @@ const CategoryList = () => {
   return (
     <div className="container mx-auto p-4 md:p-6">
       <div className="flex flex-col md:flex-row">
-        <AdminMenu />
+      <AdminMenu />
         <div className="w-full md:w-3/4 p-3">
           <h1 className="text-xl md:text-2xl font-bold mb-4">Manage Categories</h1>
           
           <div className="bg-[#1C1C1C] p-4 rounded-lg mb-6">
-            <CategoryForm
-              value={name}
-              setValue={setName}
-              handleSubmit={handleCreateCategory}
-            />
+        <CategoryForm
+          value={name}
+          setValue={setName}
+          handleSubmit={handleCreateCategory}
+        />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {categories?.map((category) => (
+          {categories?.map((category) => (
               <button
                 key={category._id}
                 className="bg-[#1C1C1C] border border-pink-500 text-pink-500 py-2 px-3 md:px-4 rounded-lg hover:bg-pink-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 w-full text-sm md:text-base transition-colors duration-200"
                 onClick={() => {
-                  setModalVisible(true);
-                  setSelectedCategory(category);
-                  setUpdatingName(category.name);
+                    setModalVisible(true);
+                    setSelectedCategory(category);
+                    setUpdatingName(category.name);
                 }}
               >
                 {category.name}
               </button>
-            ))}
-          </div>
+          ))}
+        </div>
 
-          <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)}>
+        <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)}>
             <div className="bg-[#1C1C1C] p-4 rounded-lg">
-              <CategoryForm
-                value={updatingName}
-                setValue={(value) => setUpdatingName(value)}
-                handleSubmit={handleUpdateCategory}
-                buttonText="Update"
-                handleDelete={handleDeleteCategory}
-              />
+          <CategoryForm
+            value={updatingName}
+            setValue={(value) => setUpdatingName(value)}
+            handleSubmit={handleUpdateCategory}
+            buttonText="Update"
+            handleDelete={handleDeleteCategory}
+          />
             </div>
-          </Modal>
+        </Modal>
         </div>
       </div>
     </div>

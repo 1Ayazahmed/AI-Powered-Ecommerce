@@ -120,7 +120,7 @@ const Cart = () => {
               <div className="p-4 rounded-lg bg-[#151515]">
                 <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">
                   Order Summary
-                </h2>
+                  </h2>
 
                 <div className="text-white mb-4">
                   Items: ({cartItems.reduce((acc, item) => acc + item.qty, 0)})
@@ -128,20 +128,20 @@ const Cart = () => {
 
                 <div className="text-2xl font-bold mb-4">
                   Total: 
-                  {
-                    convertPrice(
-                      cartItems.reduce((acc, item) => acc + item.qty * item.price, 0)
-                    )
-                  }
-                </div>
+                    {
+                      convertPrice(
+                        cartItems.reduce((acc, item) => acc + item.qty * item.price, 0)
+                      )
+                    }
+                  </div>
 
-                <button
-                  className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
-                  disabled={cartItems.length === 0}
-                  onClick={checkoutHandler}
-                >
-                  Proceed To Checkout
-                </button>
+                  <button
+                    className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
+                    disabled={cartItems.length === 0}
+                    onClick={checkoutHandler}
+                  >
+                    Proceed To Checkout
+                  </button>
               </div>
             </div>
           </>

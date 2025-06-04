@@ -218,12 +218,12 @@ const AdminDashboard = () => {
 
         {/* User Prediction Section */}
         <div className="w-full mx-auto mt-8">
-          <Card
+          <Card 
             title={
               <div className="text-white text-lg md:text-xl font-semibold">
                 User Purchase Prediction
               </div>
-            }
+            } 
             className="mb-6 bg-black border-gray-800"
             headStyle={{ borderBottom: '1px solid #333' }}
             bodyStyle={{ backgroundColor: 'black' }}
@@ -231,7 +231,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-4">
               <Select
                 showSearch
-                style={{
+                style={{ 
                   width: '100%', // Make select full width on small screens
                   maxWidth: 300, // Max width on larger screens
                   color: '#ccc',
@@ -280,25 +280,25 @@ const AdminDashboard = () => {
                 {/* Purchase History Chart */}
                 {purchaseHistoryData && purchaseHistoryData.length > 0 && (
                   <div className="mt-6">
-                    <Title level={4} className="text-white">Purchase History:</Title>
+                <Title level={4} className="text-white">Purchase History:</Title>
                      <ResponsiveContainer width="100%" height={300}>
-                      <LineChart
-                        data={purchaseHistoryData}
+                  <LineChart
+                    data={purchaseHistoryData}
                         margin={{
                           top: 5,
                           right: 30,
                           left: 20,
                           bottom: 5,
                         }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey="date" stroke="#ccc" />
                         <YAxis stroke="#ccc" />
                         <Tooltip contentStyle={{ backgroundColor: '#333', border: '1px solid #555' }} itemStyle={{ color: 'white' }} />
                         <Legend />
                         <RechartsLine type="monotone" dataKey="total" stroke="#8884d8" activeDot={{ r: 8 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                  </LineChart>
+                </ResponsiveContainer>
                   </div>
                 )}
               </div>
