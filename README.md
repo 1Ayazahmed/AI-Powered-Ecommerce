@@ -2,4 +2,4 @@
 
 # [AI FEATURED ECOMMERCE]() 🤘🥂.
 
-![Course Thumbnail](/thumb.png)
+![Project Thumbnail](/thumb.png.png)
