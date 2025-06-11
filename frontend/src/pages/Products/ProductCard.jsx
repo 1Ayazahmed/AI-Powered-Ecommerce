@@ -49,7 +49,7 @@ const ProductCard = ({ p }) => {
   };
 
   return (
-    <div className="max-w-sm relative bg-[#1A1A1A] rounded-lg shaodw dark:bg-gray-800 dark:border-gray-700">
+    <div className="w-full max-w-xs min-h-[420px] flex flex-col justify-between relative bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-[#232323]">
       <section className="relative">
         <Link to={`/product/${p._id}`}>
           <span className="absolute bottom-3 right-3 bg-pink-100 text-pink-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">
@@ -88,9 +88,11 @@ const ProductCard = ({ p }) => {
         <HeartIcon product={p} />
       </section>
 
-      <div className="p-5">
-        <div className="flex justify-between items-center">
-          <h5 className="mb-2 text-xl text-white dark:text-white">{p?.name}</h5>
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex justify-between items-start gap-2">
+          <h5 className="mb-2 text-xl text-white dark:text-white font-semibold leading-tight line-clamp-2 break-words overflow-hidden">
+            {p?.name}
+          </h5>
 
           <div>
              {p.discountPercentage > 0 ? (
@@ -115,11 +117,12 @@ const ProductCard = ({ p }) => {
 
         </div>
 
-        <p className="mb-3 font-normal text-[#CFCFCF]">
-          {p?.description?.substring(0, 60)} ...
+        <p className="mb-3 font-normal text-[#CFCFCF] line-clamp-2 break-words">
+          {p?.description}
         </p>
 
-        <section className="flex justify-between items-center">
+        <div className="flex-1" />
+        <section className="flex justify-between items-center mt-4">
           <Link
             to={`/product/${p._id}`}
             className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-pink-700 rounded-lg hover:bg-pink-800 focus:ring-4 focus:outline-none focus:ring-pink-300 dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
@@ -141,12 +144,12 @@ const ProductCard = ({ p }) => {
               />
             </svg>
           </Link>
-
           <button
-            className="p-2 rounded-full"
+            className="p-2 rounded-full bg-[#232323] hover:bg-pink-600 transition-colors"
             onClick={() => addToCartHandler(p, 1)}
+            title="Add to Cart"
           >
-            <AiOutlineShoppingCart size={25} />
+            <AiOutlineShoppingCart size={22} className="text-white" />
           </button>
         </section>
       </div>

@@ -5,7 +5,8 @@ import {
   useGetOrdersQuery, 
   useDeliverOrderMutation,
   useDeleteOrderMutation,
-  useMarkOrderAsApprovedMutation
+  useMarkOrderAsApprovedMutation,
+  useMarkOrderAsPaidMutation
 } from "../../redux/api/orderApiSlice";
 import AdminMenu from "./AdminMenu";
 import { toast } from "react-toastify";
@@ -16,6 +17,7 @@ const OrderList = () => {
   const [deliverOrder] = useDeliverOrderMutation();
   const [deleteOrder] = useDeleteOrderMutation();
   const [markOrderAsApproved, { isLoading: isApproving }] = useMarkOrderAsApprovedMutation();
+  const [markOrderAsPaid, { isLoading: isMarkingPaid }] = useMarkOrderAsPaidMutation();
   const { currentCurrency, exchangeRates } = useSelector((state) => state.currency);
 
   const convertPrice = (priceInUSD) => {
@@ -70,6 +72,16 @@ const OrderList = () => {
     }
   };
 
+  const markAsPaidHandler = async (id) => {
+    try {
+      await markOrderAsPaid(id);
+      refetch();
+      toast.success("Order marked as paid");
+    } catch (error) {
+      toast.error(error?.data?.message || error.message);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 md:p-6">
       <AdminMenu />
@@ -100,7 +112,7 @@ const OrderList = () => {
                 <tr key={order._id} className="border-b border-gray-700">
                   <td className="py-2 pl-1 pr-2 text-xs sm:text-sm md:pl-4 md:pr-3 md:text-base min-w-[5rem]">
                   <img
-                    src={order.orderItems[0].image}
+                    src={`http://localhost:5000${order.orderItems[0].image}`}
                     alt={order._id}
                       className="w-[2.5rem] h-[2.5rem] sm:w-[3rem] sm:h-[3rem] object-cover"
                   />
@@ -145,6 +157,15 @@ const OrderList = () => {
                         disabled={isApproving}
                       >
                           {isApproving ? '...' : 'Approve'}
+                      </button>
+                    )}
+                    {!order.isPaid && (
+                      <button
+                        onClick={() => markAsPaidHandler(order._id)}
+                          className="bg-purple-500 text-white text-xs py-1 px-2 rounded w-full text-center"
+                        disabled={isMarkingPaid}
+                      >
+                          {isMarkingPaid ? '...' : 'Mark Paid'}
                       </button>
                     )}
                     <button

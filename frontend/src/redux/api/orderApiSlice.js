@@ -76,6 +76,13 @@ export const orderApiSlice = apiSlice.injectEndpoints({
         method: 'PUT',
       }),
     }),
+
+    markOrderAsPaid: builder.mutation({
+      query: (orderId) => ({
+        url: `${ORDERS_URL}/${orderId}/pay`,
+        method: "PUT",
+      }),
+    }),
   }),
 });
 
@@ -93,4 +100,5 @@ export const {
   useGetOrdersQuery,
   useDeleteOrderMutation,
   useMarkOrderAsApprovedMutation,
+  useMarkOrderAsPaidMutation,
 } = orderApiSlice;

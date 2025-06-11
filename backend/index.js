@@ -16,7 +16,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import recommendationRoutes from './routes/recommendationRoutes.js';
 import aiRoutes from './routes/ai.routes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
-
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 // Handle __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -66,9 +66,10 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/orders", orderRoutes);
 app.use('/api', recommendationRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 console.log('Registering AI routes under /api/ai_features_test', aiRoutes);
-app.use('/api/ai_features_test', aiRoutes);
+app.use('/api', aiRoutes);
 
 // PayPal Config Route
 app.get("/api/config/paypal", (req, res) => {

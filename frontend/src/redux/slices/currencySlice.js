@@ -20,7 +20,7 @@ export const fetchExchangeRates = createAsyncThunk(
 );
 
 const initialState = {
-  currentCurrency: "PKR", // Default currency
+  currentCurrency: "USD", // Default currency
   exchangeRates: {},
   loading: false,
   error: null,

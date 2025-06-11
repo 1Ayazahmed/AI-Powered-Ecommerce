@@ -22,11 +22,19 @@ const PredictiveAnalytics = () => {
   }, [timeRange]);
 
   const fetchAnalytics = async () => {
+    console.log('fetchAnalytics function called');
     try {
+      console.log('Making API call to /api/analytics', timeRange);
       const response = await axios.get(`http://localhost:5000/api/analytics?timeRange=${timeRange}`);
-      setAnalytics(response.data);
+      
+      // Keep date strings as YYYY-MM-DD format
+      const salesData = response.data.salesData; // Use data directly
+
+      setAnalytics({...response.data, salesData}); // Update state with salesData
+      console.log('Fetched salesData for chart:', salesData);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching analytics data:', err);
       setError('Failed to load analytics data');
       setLoading(false);
     }
@@ -108,19 +116,27 @@ const PredictiveAnalytics = () => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={analytics?.salesData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={(tickItem) => {
+                  console.log('XAxis tickItem:', tickItem);
+                  const [year, month, day] = tickItem.split('-');
+                  return `${month}/${day}/${year}`;
+                }}
+              />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                formatter={(value, name) => [`${value.toFixed(2)}`, name]} 
+                labelFormatter={(label) => {
+                  console.log('Tooltip label:', label);
+                  const [year, month, day] = label.split('-');
+                  return `Date: ${month}/${day}/${year}`;
+                }}
+              />
               <Legend />
               <Line
                 type="monotone"
-                dataKey="actual"
-                stroke="#3B82F6"
-                name="Actual Sales"
-              />
-              <Line
-                type="monotone"
-                dataKey="predicted"
+                dataKey="sales"
                 stroke="#10B981"
                 strokeDasharray="5 5"
                 name="Predicted Sales"

@@ -7,7 +7,6 @@ import {
 } from "../../redux/api/orderApiSlice";
 
 import { useState, useEffect } from "react";
-import AdminMenu from "./AdminMenu";
 import OrderList from "./OrderList";
 import Loader from "../../components/Loader";
 import { Card, Select, Button, Typography } from 'antd';
@@ -16,6 +15,8 @@ import { SearchOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { LineChart, Line as RechartsLine, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
+import AdvancedAnalytics from '../../components/AI/AdvancedAnalytics';
+import AdminHeader from '../../components/layout/AdminHeader';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -152,7 +153,7 @@ const AdminDashboard = () => {
       // Format purchase history data for the chart
       if (response.data?.purchase_history) {
         const formattedHistory = response.data.purchase_history.map(item => ({
-          date: new Date(item.date).toLocaleDateString(),
+          date: item.date.split('T')[0], // Get YYYY-MM-DD from ISO string
           total: item.total
         })).sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
         setPurchaseHistoryData(formattedHistory);
@@ -168,178 +169,176 @@ const AdminDashboard = () => {
   };
 
   return (
-    <>
-      <AdminMenu />
-
-      <section className="p-4 md:p-6 xl:ml-[4rem] md:ml-[0rem]">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-          <div className="rounded-lg bg-black p-5 w-full mt-5">
-            <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
-            </div>
-
-            <p className="mt-5">Sales</p>
-            <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : sales.totalSales.toFixed(2)}
-            </h1>
+    <div className="overflow-x-hidden ml-24">
+      <AdminHeader />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="rounded-lg bg-black p-6">
+          <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
+            $
           </div>
-          <div className="rounded-lg bg-black p-5 w-full mt-5">
-            <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
-            </div>
-
-            <p className="mt-5">Customers</p>
-            <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : customers?.length}
-            </h1>
-          </div>
-          <div className="rounded-lg bg-black p-5 w-full mt-5">
-            <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
-            </div>
-
-            <p className="mt-5">All Orders</p>
-            <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : orders?.totalOrders}
-            </h1>
-          </div>
+          <p className="mt-5 text-gray-300">Sales</p>
+          <h1 className="text-2xl font-bold text-white">
+            {isLoading ? <Loader /> : sales.totalSales.toFixed(2)}
+          </h1>
         </div>
-
-        {/* Sales Chart */}
-        <div className="w-full mx-auto mt-8">
-          <Chart
-            options={state.options}
-            series={state.series}
-            type="line"
-            height={350}
-          />
+        <div className="rounded-lg bg-black p-6">
+          <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <p className="mt-5 text-gray-300">Customers</p>
+          <h1 className="text-2xl font-bold text-white">
+            {isLoading ? <Loader /> : customers?.length}
+          </h1>
         </div>
+        <div className="rounded-lg bg-black p-6">
+          <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <p className="mt-5 text-gray-300">All Orders</p>
+          <h1 className="text-2xl font-bold text-white">
+            {isLoading ? <Loader /> : orders?.totalOrders}
+          </h1>
+        </div>
+      </div>
 
-        {/* User Prediction Section */}
-        <div className="w-full mx-auto mt-8">
-          <Card 
-            title={
-              <div className="text-white text-lg md:text-xl font-semibold">
-                User Purchase Prediction
-              </div>
-            } 
-            className="mb-6 bg-black border-gray-800"
-            headStyle={{ borderBottom: '1px solid #333' }}
-            bodyStyle={{ backgroundColor: 'black' }}
-          >
-            <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-4">
-              <Select
-                showSearch
-                style={{ 
-                  width: '100%', // Make select full width on small screens
-                  maxWidth: 300, // Max width on larger screens
-                  color: '#ccc',
-                }}
-                placeholder="Select a user"
-                loading={usersLoading}
-                onChange={(value) => setUserId(value)}
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      {/* Advanced Analytics */}
+      <div className="mt-8">
+        <AdvancedAnalytics />
+      </div>
+
+      {/* User Prediction Section */}
+      <div className="mx-auto mt-8">
+        <Card 
+          title={
+            <div className="text-white text-lg md:text-xl font-semibold">
+              User Purchase Prediction
+            </div>
+          } 
+          className="mb-6 bg-black border-gray-800"
+          styles={{
+            header: { borderBottom: '1px solid #333' },
+            body: { backgroundColor: 'black' }
+          }}
+        >
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
+            <Select
+              showSearch
+              style={{ 
+                width: '100%',
+                maxWidth: 300,
+                color: '#ccc',
+              }}
+              placeholder="Select a user"
+              loading={usersLoading}
+              onChange={(value) => setUserId(value)}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+              className="custom-select"
+              styles={{
+                popup: {
+                  root: { backgroundColor: '#1a1a1a', color: 'white' }
                 }
-                className="custom-select"
-                dropdownStyle={{ backgroundColor: '#1a1a1a', color: 'white' }}
-                popupClassName="custom-dropdown"
-              >
-                {users && users.length > 0 ? (
-                  users.map(user => (
-                    <Option key={user.id} value={user.id} style={{ color: 'white' }}>
-                      {user.name} ({user.email})
-                    </Option>
-                  ))
-                ) : (
-                  <Option disabled style={{ color: '#666' }}>No users available</Option>
-                )}
-              </Select>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={fetchPrediction}
-                loading={predictionLoading}
-                className="w-full md:w-auto" /* Make button full width on small scre */
-              >
-                Get Prediction
-              </Button>
-            </div>
+              }}
+            >
+              {users && users.length > 0 ? (
+                users.map(user => (
+                  <Option key={user.id} value={user.id} style={{ color: 'white' }}>
+                    {user.name} ({user.email})
+                  </Option>
+                ))
+              ) : (
+                <Option value="" disabled>No users found</Option>
+              )}
+            </Select>
+            <Button
+              type="primary"
+              onClick={fetchPrediction}
+              loading={predictionLoading}
+              className="bg-pink-500 hover:bg-pink-600"
+            >
+              Predict
+            </Button>
+          </div>
 
-            {predictionLoading && <Loader />}
-            {predictionError && <Message variant="danger">{predictionError}</Message>}
+          {predictionLoading && <Loader />}
+          {predictionError && <Message variant="danger">{predictionError}</Message>}
 
-            {prediction && (
-              <div className="mt-4">
-                <Title level={4} className="text-white">Prediction Result:</Title>
-                <Text className="text-white">Date: {new Date(prediction.predicted_date).toLocaleDateString()}</Text><br />
-                <Text className="text-white">Category: {categories.find(cat => cat._id === prediction.predicted_category)?.name || prediction.predicted_category}</Text><br />
-                <Text className="text-white">Confidence: {prediction.confidence_score.toFixed(2)}</Text>
+          {prediction && (
+            <div className="mt-4">
+              <Title level={4} className="text-white">Prediction Result:</Title>
+              <Text className="text-white">Date: {new Date(prediction.predicted_date).toLocaleDateString()}</Text><br />
+              <Text className="text-white">Category: {categories.find(cat => cat._id === prediction.predicted_category)?.name || prediction.predicted_category}</Text><br />
+              <Text className="text-white">Confidence: {prediction.confidence_score.toFixed(2)}</Text>
 
-                {/* Purchase History Chart */}
-                {purchaseHistoryData && purchaseHistoryData.length > 0 && (
-                  <div className="mt-6">
-                <Title level={4} className="text-white">Purchase History:</Title>
-                     <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={purchaseHistoryData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
+              {/* Purchase History Chart */}
+              {purchaseHistoryData && purchaseHistoryData.length > 0 && (
+                <div className="mt-6">
+                  <Title level={4} className="text-white">Purchase History:</Title>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={purchaseHistoryData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="#ccc" 
+                        tickFormatter={(tickItem) => { // Add tickFormatter
+                          if (!tickItem) return ''; // Handle potential empty tickItem
+                          const [year, month, day] = tickItem.split('-');
+                          return `${month}/${day}/${year}`;
                         }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                        <XAxis dataKey="date" stroke="#ccc" />
-                        <YAxis stroke="#ccc" />
-                        <Tooltip contentStyle={{ backgroundColor: '#333', border: '1px solid #555' }} itemStyle={{ color: 'white' }} />
-                        <Legend />
-                        <RechartsLine type="monotone" dataKey="total" stroke="#8884d8" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-                  </div>
-                )}
-              </div>
-            )}
+                      />
+                      <YAxis stroke="#ccc" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#333', border: '1px solid #555' }} 
+                        itemStyle={{ color: 'white' }}
+                        labelFormatter={(label) => { 
+                          if (!label) return 'Date: Invalid Date'; // Handle potential empty label
+                          
+                          const date = new Date(label); // Create Date object from YYYY-MM-DD string
+                          if (isNaN(date.getTime())) { // Check if date is valid
+                            return 'Date: Invalid Date';
+                          }
+                          
+                          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                          const day = date.getDate().toString().padStart(2, '0');
+                          const year = date.getFullYear();
+                          
+                          const formattedDate = `${month}/${day}/${year}`;
+                          
+                          return <span>{`Date: ${formattedDate}`}</span>; 
+                        }}
+                      />
+                      <Legend />
+                      <RechartsLine type="monotone" dataKey="total" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
-          </Card>
-        </div>
+            </div>
+          )}
 
-        {/* Order List */}
-        <div className="mt-8">
-          <OrderList />
-        </div>
-      </section>
+        </Card>
+      </div>
 
-      {/* Add custom styles for Select component */}
-      <style jsx global>{`
-        .custom-select .ant-select-selector {
-          background-color: #1a1a1a !important;
-          border-color: #333 !important;
-          color: white !important;
-        }
-        .custom-select .ant-select-selection-placeholder {
-          color: #ccc !important;
-        }
-        .custom-select .ant-select-selection-item {
-          color: white !important;
-        }
-        .custom-select .ant-select-arrow {
-          color: #666 !important;
-        }
-        .custom-dropdown .ant-select-item {
-          color: white !important;
-        }
-        .custom-dropdown .ant-select-item-option-selected {
-          background-color: #333 !important;
-        }
-        .custom-dropdown .ant-select-item-option-active {
-          background-color: #1a1a1a !important;
-        }
-      `}</style>
-    </>
+      {/* Order List */}
+      <div className="mt-8">
+        <OrderList />
+      </div>
+    </div>
   );
 };
 

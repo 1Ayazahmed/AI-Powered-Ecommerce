@@ -14,7 +14,7 @@ const AdminMenu = () => {
     <>
       <button
         className={`md:hidden bg-[#151515] p-2 fixed z-50 rounded-lg transition-all duration-300 ${
-          isMenuOpen ? "top-2 right-2" : "top-5 right-7"
+          isMenuOpen ? "top-2 left-2" : "top-5 left-7"
         }`}
         onClick={toggleMenu}
       >
@@ -25,96 +25,102 @@ const AdminMenu = () => {
         )}
       </button>
 
-      <section
+      {/* Sidebar with opacity effect */}
+      <div
         className={`
-          ${isMenuOpen ? "translate-x-0" : "translate-x-full"} 
-          md:translate-x-0 
-          fixed top-0 right-0 w-64 h-full bg-[#151515] z-40 p-4 
-          md:relative md:w-64 md:h-auto md:block md:right-auto md:top-auto 
-          transition-transform duration-300 ease-in-out
+          group
+          fixed top-0 left-0 w-24 h-full z-40
+          bg-black/30 hover:bg-black/90
+          transition-all duration-300
+          flex flex-col items-center
+          ${isMenuOpen ? 'block' : 'md:block'}
         `}
+        style={{ pointerEvents: isMenuOpen ? 'auto' : undefined }}
       >
-        <div className="md:hidden text-right mb-4">
-           <button onClick={toggleMenu} className="text-white">
-              <FaTimes size={20} />
-           </button>
+        {/* Mobile close button */}
+        <div className="md:hidden text-right mb-4 w-full pr-2 pt-2">
+          <button onClick={toggleMenu} className="text-white">
+            <FaTimes size={20} />
+          </button>
         </div>
-
-        <ul className="list-none mt-2 space-y-2">
+        {/* Sidebar content with fade effect */}
+        <div className="opacity-60 group-hover:opacity-100 transition-all duration-300 w-full flex-1 flex flex-col items-center justify-center">
+          <ul className="list-none mt-2 space-y-2 md:mt-0 md:space-y-0 md:flex md:flex-col w-full items-center">
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/dashboard"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Admin Dashboard
               </NavLink>
             </li>
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/categorylist"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Create Category
               </NavLink>
             </li>
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/productlist"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Create Product
               </NavLink>
             </li>
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/allproductslist"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 All Products
               </NavLink>
             </li>
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/userlist"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Manage Users
               </NavLink>
             </li>
             <li>
               <NavLink
-              className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200"
+                className="block py-2 px-3 hover:bg-[#2E2D2D] rounded-sm text-white transition-colors duration-200 text-center"
                 to="/admin/orderlist"
                 style={({ isActive }) => ({
-                  color: isActive ? "greenyellow" : "white",
+                  color: isActive ? "#ec4899" : "white",
                 })}
-              onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Manage Orders
               </NavLink>
             </li>
           </ul>
-        </section>
+        </div>
+      </div>
 
       {isMenuOpen && (
         <div

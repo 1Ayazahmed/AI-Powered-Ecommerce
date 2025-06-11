@@ -257,7 +257,7 @@ router.get('/analytics', async (req, res) => {
       customerGrowth,
       salesTrend,
       salesByCategory,
-      salesForecast
+      salesData: salesForecast
     };
 
     console.log('Analytics data:', analytics);

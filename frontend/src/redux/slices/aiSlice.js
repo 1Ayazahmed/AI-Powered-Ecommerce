@@ -7,7 +7,7 @@ export const fetchRecommendations = createAsyncThunk(
   async ({ userId, orderHistory }, { rejectWithValue }) => {
     try {
       // Now making a POST request to the personalized recommendations endpoint
-      const response = await axios.post('/api/ai_features_test/get-personalized-recommendations', {
+      const response = await axios.post('/api/get-personalized-recommendations', {
           userId,
           orderHistory
       });
@@ -26,7 +26,7 @@ export const fetchAnalytics = createAsyncThunk(
   'ai/fetchAnalytics',
   async (timeRange, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/ai_features_test/analytics?timeRange=${timeRange}`);
+      const response = await axios.get(`/api/analytics?timeRange=${timeRange}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -38,7 +38,7 @@ export const sendChatMessage = createAsyncThunk(
   'ai/sendChatMessage',
   async (message, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/ai_features_test/chatbot', { message });
+      const response = await axios.post('/api/chatbot', { message });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -73,7 +73,9 @@ const Chatbot = () => {
               />
             </div>
           }
-          bodyStyle={{ padding: 0 }}
+          styles={{
+            body: { padding: 0 }
+          }}
         >
           <div 
             className="p-4 overflow-y-auto"

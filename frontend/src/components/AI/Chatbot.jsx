@@ -48,15 +48,15 @@ const Chatbot = () => {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 w-96 bg-gray-900 rounded-lg shadow-xl flex flex-col text-gray-100">
-        <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center justify-between">
+      <div className="fixed bottom-4 right-4 w-96 bg-[#181818] border border-[#292929] rounded-lg shadow-xl flex flex-col text-pink-500">
+        <div className="bg-[#232323] text-white p-4 rounded-lg flex items-center justify-between border-b border-[#292929]">
           <div className="flex items-center">
-            <FaRobot className="mr-2" />
+            <FaRobot className="mr-2 text-pink-500" />
             <h3 className="font-semibold">AI Assistant</h3>
           </div>
           <button
             onClick={toggleMinimize}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-pink-400 hover:text-pink-300 transition-colors"
           >
             <FaExpand />
           </button>
@@ -66,21 +66,20 @@ const Chatbot = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-gray-900 rounded-lg shadow-xl flex flex-col text-gray-100">
-      <div className="bg-gray-800 text-white p-4 rounded-t-lg flex items-center justify-between">
+    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-[#181818] border border-[#292929] rounded-lg shadow-xl flex flex-col text-pink-500">
+      <div className="bg-[#232323] text-white p-4 rounded-t-lg flex items-center justify-between border-b border-[#292929]">
         <div className="flex items-center">
-          <FaRobot className="mr-2" />
+          <FaRobot className="mr-2 text-pink-500" />
           <h3 className="font-semibold">AI Assistant</h3>
         </div>
         <button
           onClick={toggleMinimize}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-pink-400 hover:text-pink-300 transition-colors"
         >
           <FaCompress />
         </button>
       </div>
-      
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-800">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#181818]">
         {messages.map((message, index) => (
           <div
             key={index}
@@ -89,8 +88,8 @@ const Chatbot = () => {
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
                 message.sender === 'user'
-                  ? 'bg-blue-700 text-white'
-                  : 'bg-gray-700 text-gray-100'
+                  ? 'bg-pink-500 text-white'
+                  : 'bg-[#232323] text-pink-200'
               }`}
             >
               {message.text}
@@ -99,31 +98,30 @@ const Chatbot = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-700 text-gray-100 rounded-lg p-3">
+            <div className="bg-[#232323] text-pink-200 rounded-lg p-3">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200"></div>
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce delay-100"></div>
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce delay-200"></div>
               </div>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700 bg-gray-900">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-[#292929] bg-[#181818]">
         <div className="flex space-x-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100 border-gray-600"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-[#232323] text-pink-200 border-[#292929]"
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="bg-pink-500 text-white p-2 rounded-lg hover:bg-pink-600 transition-colors disabled:opacity-50"
           >
             <FaPaperPlane />
           </button>
