@@ -1,5 +1,5 @@
-﻿# MERN E-Commerce Store 👇
+﻿# AI POWERED MERN E-Commerce Store 👇
 
-# [Watch me build this Store]() 🤘🥂.
+# [AI FEATURED ECOMMERCE]() 🤘🥂.
 
 ![Course Thumbnail](/thumb.png)
