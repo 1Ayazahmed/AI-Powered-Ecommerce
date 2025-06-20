@@ -15,7 +15,7 @@ load_dotenv()
 # openai.api_key = os.getenv('OPENAI_API_KEY')
 
 # Use the provided Gemini API Key
-GEMINI_API_KEY = "AIzaSyDYkETyTMPXDT2-tM4jgGAZsbUXw41-MV0"
+GEMINI_API_KEY = ""
 
 app = Flask(__name__)
 CORS(app)
