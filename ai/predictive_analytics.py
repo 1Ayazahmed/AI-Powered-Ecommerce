@@ -20,7 +20,7 @@ CORS(app)
 
 # MongoDB connection
 try:
-    client = MongoClient(os.getenv('MONGODB_URI', "mongodb+srv://ayazkk616:Ayaz.%40hmed.%401999@mern-commerce-cluster.ntyxp1b.mongodb.net/?retryWrites=true&w=majority&appName=mern-commerce-cluster"))
+    client = MongoClient(os.getenv('MONGODB_URI', ""))
     db = client['test']
     orders_collection = db['orders']
     users_collection = db['users']
