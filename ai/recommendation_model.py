@@ -16,7 +16,7 @@ CORS(app)
 # logging.basicConfig(level=logging.INFO)
 
 # # Replace with your actual MongoDB URI
-# client = MongoClient("mongodb+srv://ayazkk616:Ayaz.%40hmed.%401999@mern-commerce-cluster.ntyxp1b.mongodb.net/?retryWrites=true&w=majority&appName=mern-commerce-cluster")
+# client = MongoClient("")
 # db = client["your-db-name"]
 # products_collection = db["products"]
 
@@ -59,7 +59,7 @@ CORS(app)
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-client = MongoClient("mongodb+srv://ayazkk616:Ayaz.%40hmed.%401999@mern-commerce-cluster.ntyxp1b.mongodb.net/?retryWrites=true&w=majority&appName=mern-commerce-cluster")
+client = MongoClient("")
 db = client["test"]
 products_collection = db["products"]
 users_collection = db["users"]
